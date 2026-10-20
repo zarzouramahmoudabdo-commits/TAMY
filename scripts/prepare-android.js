@@ -66,21 +66,9 @@ rw(styles, (s) => {
 });
 console.log('✓ أيقونة الإشعار');
 
-/* 4) توقيع ثابت (ليُحدَّث التطبيق فوق النسخة القديمة بدون حذف) */
-const gradle = path.join(A, 'app', 'build.gradle');
-rw(gradle, (s) => {
-  if (s.indexOf('tamy.keystore') > -1) return s;
-  const block =
-    '    signingConfigs {\n' +
-    '        debug {\n' +
-    '            storeFile file("$rootDir/../tamy.keystore")\n' +
-    '            storePassword "tamy1234"\n' +
-    '            keyAlias "tamy"\n' +
-    '            keyPassword "tamy1234"\n' +
-    '        }\n' +
-    '    }\n';
-  return s.replace(/(\n\s*android\s*\{\n)/, '$1' + block);
-});
+/* 4) اترك توقيع Debug الافتراضي الخاص بأندرويد.
+ * لا تفرض tamy.keystore لأنه غير موجود في GitHub Actions.
+ */
 /* 5) رقم النسخة (يزيد مع كل بناء ليقبله أندرويد كتحديث) */
 if (process.env.VERSION_CODE) {
   rw(gradle, (s) => s
