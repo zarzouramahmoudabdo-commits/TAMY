@@ -386,7 +386,7 @@
       '</header>' + quranCard +
       groups +
       '<section class="sec"><h2><span class="orn"></span>الأدوات<span class="orn"></span></h2><div class="tools">' + tools + '</div></section>' +
-      '<p class="foot">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p>'
+      '<div class="home-signature"><p class="foot">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p><small class="app-credit">تم عمل التطبيق بواسطة Mahmoud A Zarzoura</small></div>'
     );
 
     function tick() {

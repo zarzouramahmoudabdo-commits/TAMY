@@ -371,3 +371,7 @@ input[type=range] { width: 100%; accent-color: var(--gold); margin: 10px 0 0; }
 #adhanBar .ab-b .ic .g, #adhanBar .ab-b .g { fill: #3a2a00; stroke: #3a2a00; }
 
 .sep { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); margin: 0 8px; vertical-align: middle; opacity: .8; }
+
+.home-signature { text-align: center; padding: 0 12px 18px; }
+.home-signature .foot { margin-bottom: 7px; }
+.app-credit { display: block; color: var(--gold); font-size: 12px; opacity: .72; letter-spacing: .2px; }
