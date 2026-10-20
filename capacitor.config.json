@@ -1,0 +1,16 @@
+{
+  "appId": "com.tamy.azkar",
+  "appName": "TAMY",
+  "webDir": "www",
+  "backgroundColor": "#062b24",
+  "android": {
+    "backgroundColor": "#062b24",
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_tamy",
+      "iconColor": "#e6bf63"
+    }
+  }
+}

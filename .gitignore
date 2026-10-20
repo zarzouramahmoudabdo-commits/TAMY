@@ -1,0 +1,10 @@
+node_modules/
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+www/fonts/*.woff2
+.DS_Store
+www/quran.json
+www/audio/
+www/features.json
