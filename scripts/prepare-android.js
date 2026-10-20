@@ -69,6 +69,7 @@ console.log('✓ أيقونة الإشعار');
 /* 4) اترك توقيع Debug الافتراضي الخاص بأندرويد.
  * لا تفرض tamy.keystore لأنه غير موجود في GitHub Actions.
  */
+const gradle = path.join(A, 'app', 'build.gradle');
 /* 5) رقم النسخة (يزيد مع كل بناء ليقبله أندرويد كتحديث) */
 if (process.env.VERSION_CODE) {
   rw(gradle, (s) => s
