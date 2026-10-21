@@ -53,6 +53,12 @@
 
   /* ---------- إذاعة القرآن الكريم ---------- */
   var radioAudio = null;
+  var radioRun = 0;
+  var radioSources = [
+    'https://stream.radiojar.com/8s5u5tpdtwzuv',
+    'https://qurango.net/radio/tarateel'
+  ];
+
   function radioPaint(text) {
     var status = $('#qRadioStatus');
     var btn = $('#qRadioToggle');
@@ -60,36 +66,76 @@
     if (btn) btn.textContent =
       radioAudio && !radioAudio.paused ? 'إيقاف الإذاعة' : 'استمع الآن';
   }
+
   function radioStop() {
-    if (radioAudio) {
-      radioAudio.pause();
-      radioAudio.src = '';
-      radioAudio = null;
+    radioRun++;
+    var old = radioAudio;
+    radioAudio = null;
+    if (old) {
+      old.onerror = null;
+      old.onplaying = null;
+      old.onended = null;
+      try { old.pause(); old.removeAttribute('src'); old.load(); } catch (e) {}
     }
     radioPaint('متوقفة');
   }
+
   function radioToggle() {
     if (radioAudio && !radioAudio.paused) {
       radioStop();
       return;
     }
+
     radioStop();
-    radioAudio = new Audio(
-      'https://stream.radiojar.com/8s5u5tpdtwzuv'
-    );
-    radioAudio.preload = 'none';
-    radioPaint('جارٍ الاتصال...');
-    radioAudio.onplaying = function () { radioPaint('تعمل الآن'); };
-    radioAudio.onerror = function () {
-      radioStop();
-      if (T.toast) T.toast('تعذّر تشغيل الإذاعة؛ تحقق من الإنترنت وحاول مجددًا');
-    };
-    var p = radioAudio.play();
-    if (p && p.catch) p.catch(function () {
-      radioStop();
-      if (T.toast) T.toast('تعذّر تشغيل الإذاعة؛ حاول مرة أخرى');
-    });
+    var run = radioRun;
+    var index = 0;
+
+    function trySource() {
+      if (run !== radioRun) return;
+
+      if (index >= radioSources.length) {
+        radioAudio = null;
+        radioPaint('تعذّر الاتصال');
+        if (T.toast) T.toast('تعذّر تشغيل البث؛ جرّب لاحقًا أو افتح الإذاعة من المتصفح');
+        return;
+      }
+
+      var url = radioSources[index++];
+      var a = new Audio();
+      radioAudio = a;
+      var failed = false;
+      a.preload = 'none';
+
+      function fail() {
+        if (failed || run !== radioRun) return;
+        failed = true;
+        a.onerror = null;
+        a.onplaying = null;
+        try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) {}
+        if (radioAudio === a) radioAudio = null;
+        trySource();
+      }
+
+      radioPaint(index === 1 ? 'جارٍ الاتصال...' : 'تجربة بث بديل...');
+      a.onplaying = function () {
+        if (run === radioRun && radioAudio === a) {
+          radioPaint(index === 1 ? 'تعمل الآن' :
+            (url.indexOf('qurango.net') >= 0 ? 'يعمل البث البديل' : 'تعمل الآن'));
+        }
+      };
+      a.onerror = fail;
+      a.onended = function () {
+        if (run === radioRun && radioAudio === a) radioStop();
+      };
+      a.src = url;
+
+      var result = a.play();
+      if (result && result.catch) result.catch(fail);
+    }
+
+    trySource();
   }
+
   function radioCard() {
     return '<section class="q-radio">' +
       '<div class="q-radio-icon">♫</div>' +
@@ -98,6 +144,7 @@
       '<button class="q-radio-btn" id="qRadioToggle" type="button">استمع الآن</button>' +
       '</section>';
   }
+
   window.TAMYRadio = { stop: radioStop, toggle: radioToggle };
   document.addEventListener('click', function (e) {
     var btn = e.target.closest && e.target.closest('#qRadioToggle');
