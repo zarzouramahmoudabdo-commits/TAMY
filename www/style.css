@@ -375,3 +375,45 @@ input[type=range] { width: 100%; accent-color: var(--gold); margin: 10px 0 0; }
 .home-signature { text-align: center; padding: 0 12px 18px; }
 .home-signature .foot { margin-bottom: 7px; }
 .app-credit { display: block; color: var(--gold); font-size: 12px; opacity: .72; letter-spacing: .2px; }
+
+
+/* بطاقة إذاعة القرآن الكريم */
+.q-radio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid rgba(230,191,99,.42);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(230,191,99,.13), rgba(255,255,255,.035));
+}
+.q-radio-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(230,191,99,.16);
+  color: var(--gold2);
+  font-size: 25px;
+}
+.q-radio-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.q-radio-info b { color: var(--gold2); font-size: 15px; }
+.q-radio-info small { color: var(--mute); font-size: 11px; }
+.q-radio-btn {
+  flex: none;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: var(--gold);
+  color: #3a2a00;
+  font-weight: 700;
+  font-size: 12px;
+}

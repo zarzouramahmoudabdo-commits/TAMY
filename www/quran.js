@@ -50,6 +50,60 @@
   var SEP = '<i class="sep"></i>';
   var tab = 'surah';
 
+
+  /* ---------- إذاعة القرآن الكريم ---------- */
+  var radioAudio = null;
+  function radioPaint(text) {
+    var status = $('#qRadioStatus');
+    var btn = $('#qRadioToggle');
+    if (status) status.textContent = text;
+    if (btn) btn.textContent =
+      radioAudio && !radioAudio.paused ? 'إيقاف الإذاعة' : 'استمع الآن';
+  }
+  function radioStop() {
+    if (radioAudio) {
+      radioAudio.pause();
+      radioAudio.src = '';
+      radioAudio = null;
+    }
+    radioPaint('متوقفة');
+  }
+  function radioToggle() {
+    if (radioAudio && !radioAudio.paused) {
+      radioStop();
+      return;
+    }
+    radioStop();
+    radioAudio = new Audio(
+      'https://stream.radiojar.com/8s5u5tpdtwzuv'
+    );
+    radioAudio.preload = 'none';
+    radioPaint('جارٍ الاتصال...');
+    radioAudio.onplaying = function () { radioPaint('تعمل الآن'); };
+    radioAudio.onerror = function () {
+      radioStop();
+      if (T.toast) T.toast('تعذّر تشغيل الإذاعة؛ تحقق من الإنترنت وحاول مجددًا');
+    };
+    var p = radioAudio.play();
+    if (p && p.catch) p.catch(function () {
+      radioStop();
+      if (T.toast) T.toast('تعذّر تشغيل الإذاعة؛ حاول مرة أخرى');
+    });
+  }
+  function radioCard() {
+    return '<section class="q-radio">' +
+      '<div class="q-radio-icon">♫</div>' +
+      '<div class="q-radio-info"><b>إذاعة القرآن الكريم</b>' +
+      '<small>بث مباشر من القاهرة — <span id="qRadioStatus">متوقفة</span></small></div>' +
+      '<button class="q-radio-btn" id="qRadioToggle" type="button">استمع الآن</button>' +
+      '</section>';
+  }
+  window.TAMYRadio = { stop: radioStop, toggle: radioToggle };
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('#qRadioToggle');
+    if (btn) radioToggle();
+  });
+
   /* ---------- الفهرس ---------- */
   function index() {
     var last = S.quran.last, marks = S.quran.marks;
@@ -60,6 +114,7 @@
       '<div class="page">' +
         '<div class="pg-head"><h1>القرآن الكريم</h1><a class="rd-btn" href="#/quran/read/1" aria-label="ابدأ من الفاتحة">' + I.quran + '</a></div>' +
         resume +
+        radioCard() +
         '<div class="q-search">' + I.search + '<input id="qSearch" type="search" inputmode="search" placeholder="ابحث باسم السورة أو رقمها" autocomplete="off"></div>' +
         '<div class="chips tabs" id="qTabs">' +
           '<button class="chip' + (tab === 'surah' ? ' on' : '') + '" data-t="surah">السور</button>' +

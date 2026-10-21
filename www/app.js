@@ -245,6 +245,7 @@
     });
   }
   function playAdhan(key, title) {
+    if (window.TAMYRadio) window.TAMYRadio.stop();
     var f = adhanFile(key);
     if (!FEATURES.adhan || !f) { toast('لم يُضف ملف الأذان إلى هذه النسخة'); return; }
     try { if (player.audio) player.audio.pause(); } catch (e) { /* لا شيء */ }
