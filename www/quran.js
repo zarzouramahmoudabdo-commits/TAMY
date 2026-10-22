@@ -51,103 +51,56 @@
   var tab = 'surah';
 
 
-  /* ---------- إذاعة القرآن الكريم ---------- */
-  var radioAudio = null;
-  var radioRun = 0;
-  var radioSources = [
-    'https://stream.radiojar.com/8s5u5tpdtwzuv'
-  ];
-
-  function radioPaint(text) {
-    var status = $('#qRadioStatus');
-    var btn = $('#qRadioToggle');
-    if (status) status.textContent = text;
-    if (btn) btn.textContent =
-      radioAudio && !radioAudio.paused ? 'إيقاف الإذاعة' : 'استمع الآن';
+  /* ---------- إذاعة القرآن الكريم من القاهرة (بث مباشر) ---------- */
+  var RADIO_URL = 'https://stream.radiojar.com/8s5u5tpdtwzuv';
+  var rd = { a: null, want: false, state: 'off', tries: 0, timer: 0 };
+  function rdText() {
+    return rd.state === 'on' ? 'بث مباشر الآن' : rd.state === 'loading' ? (rd.tries ? 'إعادة الاتصال…' : 'جارٍ الاتصال…') : 'بث مباشر · يحتاج إنترنت';
   }
-
-  function radioStop() {
-    radioRun++;
-    var old = radioAudio;
-    radioAudio = null;
-    if (old) {
-      old.onerror = null;
-      old.onplaying = null;
-      old.onended = null;
-      try { old.pause(); old.removeAttribute('src'); old.load(); } catch (e) {}
-    }
-    radioPaint('متوقفة');
+  function rdPaint() {
+    var c = $('#rdCard'); if (!c) return;
+    c.className = 'rad2 ' + rd.state;
+    $('#rdToggle').textContent = rd.state === 'off' ? 'استمع الآن' : 'إيقاف';
+    $('#rdSub').textContent = rdText();
   }
-
-  function radioToggle() {
-    if (radioAudio && !radioAudio.paused) {
-      radioStop();
-      return;
-    }
-
-    radioStop();
-    var run = radioRun;
-    var index = 0;
-
-    function trySource() {
-      if (run !== radioRun) return;
-
-      if (index >= radioSources.length) {
-        radioAudio = null;
-        radioPaint('تعذّر الاتصال');
-        if (T.toast) T.toast('تعذّر تشغيل البث؛ جرّب لاحقًا أو افتح الإذاعة من المتصفح');
-        return;
-      }
-
-      var url = radioSources[index++];
-      var a = new Audio();
-      radioAudio = a;
-      var failed = false;
-      a.preload = 'none';
-
-      function fail() {
-        if (failed || run !== radioRun) return;
-        failed = true;
-        a.onerror = null;
-        a.onplaying = null;
-        try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) {}
-        if (radioAudio === a) radioAudio = null;
-        trySource();
-      }
-
-      radioPaint(index === 1 ? 'جارٍ الاتصال...' : 'تجربة بث بديل...');
-      a.onplaying = function () {
-        if (run === radioRun && radioAudio === a) {
-          radioPaint(index === 1 ? 'تعمل الآن' :
-            (url.indexOf('qurango.net') >= 0 ? 'يعمل البث البديل' : 'تعمل الآن'));
-        }
-      };
-      a.onerror = fail;
-      a.onended = function () {
-        if (run === radioRun && radioAudio === a) radioStop();
-      };
-      a.src = url;
-
-      var result = a.play();
-      if (result && result.catch) result.catch(fail);
-    }
-
-    trySource();
+  function rdClear() {
+    clearTimeout(rd.timer);
+    var a = rd.a; rd.a = null;
+    if (a) { a.onplaying = a.onwaiting = a.onerror = a.onended = a.onstalled = null; try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) { /* لا شيء */ } }
   }
-
+  function rdStop() { rd.want = false; rd.tries = 0; rdClear(); rd.state = 'off'; rdPaint(); }
+  // البث المباشر قد ينقطع مع ضعف الشبكة: نعيد الاتصال تلقائيًا بدل أن يتوقف
+  function rdRetry() {
+    if (!rd.want) return;
+    rdClear();
+    if (rd.tries >= 6) { if (T.toast) T.toast('تعذّر تشغيل الإذاعة. تأكد من الإنترنت ثم أعد المحاولة'); rdStop(); return; }
+    rd.tries++; rd.state = 'loading'; rdPaint();
+    rd.timer = setTimeout(rdOpen, Math.min(1000 * rd.tries, 4000));
+  }
+  function rdOpen() {
+    if (!rd.want) return;
+    rdClear();
+    var a = new Audio(RADIO_URL);
+    rd.a = a; rd.state = 'loading'; rdPaint();
+    a.onplaying = function () { if (rd.a === a) { rd.state = 'on'; rd.tries = 0; clearTimeout(rd.timer); rdPaint(); } };
+    a.onwaiting = function () { if (rd.a === a && rd.state === 'on') { rd.state = 'loading'; rdPaint(); clearTimeout(rd.timer); rd.timer = setTimeout(function () { if (rd.a === a && rd.state === 'loading') rdRetry(); }, 12000); } };
+    a.onerror = a.onended = a.onstalled = function () { if (rd.a === a) rdRetry(); };
+    clearTimeout(rd.timer);
+    rd.timer = setTimeout(function () { if (rd.a === a && rd.state === 'loading') rdRetry(); }, 15000);   // لم يبدأ البث
+    var pr = a.play();
+    if (pr && pr.catch) pr.catch(function () { if (rd.a === a) rdRetry(); });
+  }
+  function rdStart() { rdClear(); rd.want = true; rd.tries = 0; rdOpen(); }
   function radioCard() {
-    return '<section class="q-radio">' +
-      '<div class="q-radio-icon">♫</div>' +
-      '<div class="q-radio-info"><b>إذاعة القرآن الكريم</b>' +
-      '<small>بث مباشر من القاهرة — <span id="qRadioStatus">متوقفة</span></small></div>' +
-      '<button class="q-radio-btn" id="qRadioToggle" type="button">استمع الآن</button>' +
-      '</section>';
+    return '<section class="rad2 ' + rd.state + '" id="rdCard"><div class="rad2-ic">♫</div>' +
+      '<div class="rad2-tx"><b>إذاعة القرآن الكريم من القاهرة</b><small id="rdSub">' + rdText() + '</small></div>' +
+      '<button class="rad2-btn" id="rdToggle" type="button">' + (rd.state === 'off' ? 'استمع الآن' : 'إيقاف') + '</button></section>';
   }
-
-  window.TAMYRadio = { stop: radioStop, toggle: radioToggle };
+  window.TAMYRadio = { stop: rdStop };
+  window.addEventListener('online', function () { if (rd.want && rd.state !== 'on') { rd.tries = 0; rdOpen(); } });
   document.addEventListener('click', function (e) {
-    var btn = e.target.closest && e.target.closest('#qRadioToggle');
-    if (btn) radioToggle();
+    var b = e.target.closest && e.target.closest('#rdToggle');
+    if (b) { if (rd.state === 'off') rdStart(); else rdStop(); }
   });
 
   /* ---------- الفهرس ---------- */

@@ -46,6 +46,7 @@
       nSleep: true, tSleep: '22:30',
       nKahf: true,
       adhan: true,
+      theme: { bg: '', fg: '' },
       lastSchedule: 0,
       schedVer: 0
     }
@@ -796,6 +797,15 @@
           '<div class="row col"><span class="rt">ضبط الدقائق<small>للاحتياط أو للموافقة على تقويم بلدك</small></span><div class="adjs">' + adj + '</div></div>' +
         '</div>' +
 
+        '<h3 class="sh">الألوان</h3>' +
+        '<div class="card">' +
+          '<div class="row col"><span class="rt">ألوان جاهزة</span><div class="presets" id="thPresets">' + THEMES.map(function (t, i) { return '<button class="chip" data-i="' + i + '"><i style="background:' + (t.bg || '#07332b') + '"></i>' + t.n + '</button>'; }).join('') + '</div></div>' +
+          '<div class="row theme-row"><span class="rt">لون الخلفية</span><input type="color" id="thBg" value="' + ((st.theme && st.theme.bg) || '#07332b') + '"></div>' +
+          '<div class="row theme-row"><span class="rt">لون الخط</span><input type="color" id="thFg" value="' + ((st.theme && st.theme.fg) || '#fbf3dc') + '"></div>' +
+          '<div class="row col"><div class="theme-prev" id="thPrev">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</div></div>' +
+          '<div class="row btns"><button class="btn ghost sm" id="thReset">إرجاع الألوان الأصلية</button></div>' +
+        '</div>' +
+
         '<h3 class="sh">العرض</h3>' +
         '<div class="card">' +
           '<div class="row col"><span class="rt">حجم خط الأذكار</span><input type="range" id="stFont" min="20" max="40" step="2" value="' + st.fontSize + '"><div class="ztxt prev" id="stPrev" style="font-size:' + st.fontSize + 'px">سُبْحَانَ اللَّهِ وَبِحَمْدِهِ</div></div>' +
@@ -836,10 +846,50 @@
       };
     });
     $('#stFont').oninput = function (e) { st.fontSize = +e.target.value; save(); $('#stPrev').style.fontSize = st.fontSize + 'px'; };
+    function paintPrev() { var p = $('#thPrev'); if (p) { p.style.background = 'var(--card)'; p.style.color = 'var(--cream)'; } }
+    function setTheme(bg, fg, redraw) { st.theme = { bg: bg, fg: fg }; save(); applyTheme(); if (redraw) settings(); else paintPrev(); }
+    paintPrev();
+    $$('#thPresets .chip').forEach(function (c) { c.onclick = function () { var t = THEMES[+c.getAttribute('data-i')]; setTheme(t.bg, t.fg, true); }; });
+    $('#thBg').oninput = function (e) { setTheme(e.target.value, (st.theme && st.theme.fg) || '', false); };
+    $('#thFg').oninput = function (e) { setTheme((st.theme && st.theme.bg) || '', e.target.value, false); };
+    $('#thReset').onclick = function () { setTheme('', '', true); toast('رجعت الألوان الأصلية'); };
     $$('[data-hj]').forEach(function (b) {
       b.onclick = function () { st.hijriOffset = Math.max(-2, Math.min(2, (st.hijriOffset || 0) + (+b.getAttribute('data-hj')))); save(); $('#hjOff').textContent = ar(st.hijriOffset); };
     });
     bindRipples();
+  }
+
+  /* ---------- الألوان: خلفية وخط من اختيار المستخدم ---------- */
+  var THEMES = [
+    { n: 'الزمردي', bg: '', fg: '' },
+    { n: 'ليلي', bg: '#0d0f14', fg: '#f1f1f1' },
+    { n: 'أزرق', bg: '#0b2545', fg: '#eef4ff' },
+    { n: 'بنفسجي', bg: '#2a1745', fg: '#f6efff' },
+    { n: 'بني', bg: '#3b2616', fg: '#fff1de' },
+    { n: 'فاتح', bg: '#f6f0df', fg: '#1d2b26' }
+  ];
+  function hex2rgb(h) { h = String(h).replace('#', ''); if (h.length === 3) h = h.replace(/./g, '$&$&'); var n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function mix(a, b, t) { return '#' + a.map(function (v, i) { var x = Math.round(v + (b[i] - v) * t); return ('0' + Math.max(0, Math.min(255, x)).toString(16)).slice(-2); }).join(''); }
+  function lum(c) { return (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255; }
+  function applyTheme() {
+    var th = S.settings.theme || {}, r = document.documentElement.style;
+    var keys = ['--deep', '--bg', '--bg2', '--card', '--card2', '--cream', '--mute', '--t0', '--t1', '--t2', '--t3', '--t4', '--t5', '--navTop', '--glow', '--gold2'];
+    keys.forEach(function (k) { r.removeProperty(k); });
+    var bgc = null, fgc = null;
+    try { if (th.bg) bgc = hex2rgb(th.bg); if (th.fg) fgc = hex2rgb(th.fg); } catch (e) { bgc = fgc = null; }
+    if (bgc) {
+      var light = lum(bgc) > 0.55, K = [0, 0, 0], W = [255, 255, 255], up = light ? K : W, dn = light ? W : K;
+      var set = function (k, v) { r.setProperty(k, v); };
+      set('--bg', th.bg); set('--deep', mix(bgc, dn, .14)); set('--bg2', mix(bgc, up, .07)); set('--card', mix(bgc, up, .12)); set('--card2', mix(bgc, up, .2));
+      set('--t0', mix(bgc, dn, .5)); set('--t1', mix(bgc, up, .26)); set('--t2', mix(bgc, up, .1)); set('--t3', mix(bgc, dn, .1)); set('--t4', mix(bgc, up, .17)); set('--t5', mix(bgc, up, .34));
+      if (light) set('--gold2', '#7a5800');
+      set('--navTop', mix(bgc, dn, .1)); set('--glow', mix(bgc, up, .18));
+      if (!fgc) fgc = light ? [29, 43, 38] : [251, 243, 220];
+    }
+    if (fgc) {
+      var fh = '#' + fgc.map(function (v) { return ('0' + v.toString(16)).slice(-2); }).join('');
+      r.setProperty('--cream', fh); r.setProperty('--mute', mix(fgc, bgc || [7, 51, 43], .32));
+    }
   }
 
   /* ---------- الإقلاع ---------- */
@@ -857,6 +907,7 @@
   }
 
   function boot() {
+    applyTheme();
     buildNav();
     window.addEventListener('hashchange', render);
     document.addEventListener('click', function (e) {
