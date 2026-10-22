@@ -5,7 +5,7 @@
   "backgroundColor": "#062b24",
   "android": {
     "backgroundColor": "#062b24",
-    "allowMixedContent": false
+    "allowMixedContent": true
   },
   "plugins": {
     "LocalNotifications": {
