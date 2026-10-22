@@ -115,7 +115,7 @@
       '<div class="page">' +
         '<div class="pg-head"><h1>القرآن الكريم</h1><a class="rd-btn" href="#/quran/read/1" aria-label="ابدأ من الفاتحة">' + I.quran + '</a></div>' +
         resume +
-        radioCard() +
+        radioCard() + (window.TAMYListenCard ? window.TAMYListenCard() : '') +
         '<div class="q-search">' + I.search + '<input id="qSearch" type="search" inputmode="search" placeholder="ابحث باسم السورة أو رقمها" autocomplete="off"></div>' +
         '<div class="chips tabs" id="qTabs">' +
           '<button class="chip' + (tab === 'surah' ? ' on' : '') + '" data-t="surah">السور</button>' +
