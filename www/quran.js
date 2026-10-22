@@ -96,7 +96,8 @@
   function radioCard() {
     return '<section class="rad2 ' + rd.state + '" id="rdCard"><div class="rad2-ic">♫</div>' +
       '<div class="rad2-tx"><b>إذاعة القرآن الكريم من القاهرة</b><small id="rdSub">' + rdText() + '</small></div>' +
-      '<button class="rad2-btn" id="rdToggle" type="button">' + (rd.state === 'off' ? 'استمع الآن' : 'إيقاف') + '</button></section>';
+      '<button class="rad2-btn" id="rdToggle" type="button">' + (rd.state === 'off' ? 'استمع الآن' : 'إيقاف') + '</button>' +
+      '<a class="rad2-ext" href="' + RADIO_URL + '" target="_blank" rel="noopener">فتح البث في المتصفح</a></section>';
   }
   window.TAMYRadio = { stop: rdStop };
   window.addEventListener('online', function () { if (rd.want && rd.state !== 'on') { rd.tries = 0; rdOpen(); } });
