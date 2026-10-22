@@ -55,8 +55,7 @@
   var radioAudio = null;
   var radioRun = 0;
   var radioSources = [
-    'https://stream.radiojar.com/8s5u5tpdtwzuv',
-    'https://qurango.net/radio/tarateel'
+    'https://stream.radiojar.com/8s5u5tpdtwzuv'
   ];
 
   function radioPaint(text) {
