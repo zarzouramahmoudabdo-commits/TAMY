@@ -53,8 +53,9 @@
 
   /* ---------- إذاعة القرآن الكريم من القاهرة (بث مباشر) ---------- */
   var RADIO_URL = 'https://stream.radiojar.com/8s5u5tpdtwzuv';
-  var rd = { a: null, want: false, state: 'off', tries: 0, timer: 0 };
+  var rd = { a: null, code: null, want: false, state: 'off', tries: 0, timer: 0 };
   function rdText() {
+    if (rd.state === 'off' && rd.code != null) return 'تعذّر الاتصال (رمز ' + rd.code + ')';
     return rd.state === 'on' ? 'بث مباشر الآن' : rd.state === 'loading' ? (rd.tries ? 'إعادة الاتصال…' : 'جارٍ الاتصال…') : 'بث مباشر · يحتاج إنترنت';
   }
   function rdPaint() {
@@ -82,15 +83,16 @@
     rdClear();
     var a = new Audio(RADIO_URL);
     rd.a = a; rd.state = 'loading'; rdPaint();
-    a.onplaying = function () { if (rd.a === a) { rd.state = 'on'; rd.tries = 0; clearTimeout(rd.timer); rdPaint(); } };
+    a.onplaying = function () { if (rd.a === a) { rd.state = 'on'; rd.tries = 0; rd.code = null; clearTimeout(rd.timer); rdPaint(); } };
     a.onwaiting = function () { if (rd.a === a && rd.state === 'on') { rd.state = 'loading'; rdPaint(); clearTimeout(rd.timer); rd.timer = setTimeout(function () { if (rd.a === a && rd.state === 'loading') rdRetry(); }, 12000); } };
-    a.onerror = a.onended = a.onstalled = function () { if (rd.a === a) rdRetry(); };
+    a.onerror = function () { if (rd.a === a) { rd.code = a.error ? a.error.code : 0; rdRetry(); } };
+    a.onended = function () { if (rd.a === a) rdRetry(); };
     clearTimeout(rd.timer);
     rd.timer = setTimeout(function () { if (rd.a === a && rd.state === 'loading') rdRetry(); }, 15000);   // لم يبدأ البث
     var pr = a.play();
     if (pr && pr.catch) pr.catch(function () { if (rd.a === a) rdRetry(); });
   }
-  function rdStart() { rdClear(); rd.want = true; rd.tries = 0; rdOpen(); }
+  function rdStart() { rdClear(); rd.code = null; rd.want = true; rd.tries = 0; rdOpen(); }
   function radioCard() {
     return '<section class="rad2 ' + rd.state + '" id="rdCard"><div class="rad2-ic">♫</div>' +
       '<div class="rad2-tx"><b>إذاعة القرآن الكريم من القاهرة</b><small id="rdSub">' + rdText() + '</small></div>' +
