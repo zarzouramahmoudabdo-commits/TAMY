@@ -64,7 +64,7 @@
     return out;
   }
   var FEATURES = { adhan: false, adhanFajr: false };
-  var SCHED_VER = 2;   // يُرفع عند تغيير شكل التنبيهات ليُعاد جدولتها بعد التحديث
+  var SCHED_VER = 3;   // يُرفع عند تغيير شكل التنبيهات ليُعاد جدولتها بعد التحديث
   var S;
   try { S = merge(DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = clone(DEFAULTS); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* التخزين غير متاح */ } }
@@ -134,7 +134,7 @@
   // أي قناة تُستخدم لتنبيه الصلاة: قناة الأذان إن كان مفعّلًا ومتوفرًا، وإلا القناة العادية
   function adhanChannel(key) {
     if (!S.settings.adhan || !FEATURES.adhan) return 'prayer';
-    return (key === 'fajr' && FEATURES.adhanFajr) ? 'adhan_fajr' : 'adhan';
+    return (key === 'fajr' && FEATURES.adhanFajr) ? 'adhan_fajr2' : 'adhan2';
   }
   var Notif = {
     plugin: function () {
@@ -158,8 +158,8 @@
           { id: 'prayer', name: 'مواقيت الصلاة', description: 'تنبيه عند دخول وقت الصلاة', importance: 5, visibility: 1, vibration: true },
           { id: 'azkar', name: 'تذكير الأذكار', description: 'أذكار الصباح والمساء والنوم', importance: 4, visibility: 1, vibration: true }
         ];
-        if (FEATURES.adhan) chans.push({ id: 'adhan', name: 'الأذان', description: 'صوت الأذان عند دخول وقت الصلاة', importance: 5, visibility: 1, vibration: true, sound: 'adhan.mp3' });
-        if (FEATURES.adhanFajr) chans.push({ id: 'adhan_fajr', name: 'أذان الفجر', description: 'أذان الفجر', importance: 5, visibility: 1, vibration: true, sound: 'adhan_fajr.mp3' });
+        if (FEATURES.adhan) chans.push({ id: 'adhan2', name: 'الأذان', description: 'صوت الأذان عند دخول وقت الصلاة', importance: 5, visibility: 1, vibration: true, sound: 'adhan.mp3' });
+        if (FEATURES.adhanFajr) chans.push({ id: 'adhan_fajr2', name: 'أذان الفجر', description: 'أذان الفجر', importance: 5, visibility: 1, vibration: true, sound: 'adhan_fajr.mp3' });
         return Promise.all(chans.map(function (c) { return LN.createChannel(c).catch(function () { }); })).then(function () {
           return LN.getPending();
         }).then(function (pend) {
@@ -211,7 +211,7 @@
       if (!FEATURES.adhan) { toast('لم يُضف ملف الأذان إلى هذه النسخة'); return; }
       Notif.schedule(true).then(function () { return Notif.ensurePermission(); }).then(function (ok) {
         if (!ok) { toast('فعّل إذن الإشعارات للتطبيق من إعدادات الهاتف'); return; }
-        LN.schedule({ notifications: [{ id: 9998, title: 'تجربة الأذان', body: 'هكذا سيصلك تنبيه الصلاة', schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, channelId: 'adhan', sound: 'adhan.mp3' }] })
+        LN.schedule({ notifications: [{ id: 9998, title: 'تجربة الأذان', body: 'هكذا سيصلك تنبيه الصلاة', schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, channelId: 'adhan2', sound: 'adhan.mp3' }] })
           .then(function () { toast('سيصلك الأذان بعد ٥ ثوانٍ'); });
       });
     },
