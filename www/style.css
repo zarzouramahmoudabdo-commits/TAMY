@@ -438,3 +438,5 @@ input[type=range] { width: 100%; accent-color: var(--gold); margin: 10px 0 0; }
 
 .rad2 { flex-wrap: wrap; }
 .rad2-ext { flex-basis: 100%; text-align: center; font-size: 13px; color: var(--gold2); text-decoration: underline; padding-top: 4px; }
+
+.rad2-btn { text-decoration: none; }
