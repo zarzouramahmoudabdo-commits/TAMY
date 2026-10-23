@@ -102,9 +102,9 @@
     a.onpause = function () { if (P.a === a && P.state === 'on' && !a.ended) { P.state = 'paused'; paint(); } };
     a.onwaiting = function () { if (P.a === a && P.state === 'on') { P.state = 'loading'; paint(); } };
     a.onended = function () { if (P.a === a) step(1, true); };
-    a.onerror = function () { if (P.a === a) { P.err = a.error ? a.error.code : 0; P.state = 'paused'; paint(); T.toast('تعذّر تشغيل الصوت. تأكد من الإنترنت'); } };
+    a.onerror = function () { if (P.a === a && a._loc) { a._loc = false; a.src = srcUrl(); a.play(); return; } if (P.a === a) { P.err = a.error ? a.error.code : 0; P.state = 'paused'; paint(); T.toast('تعذّر تشغيل الصوت. تأكد من الإنترنت'); } };
     a.ontimeupdate = a.onloadedmetadata = tick;
-    a.src = srcUrl();
+    var lc = dlLocal(rid, mi, n); a._loc = !!lc; a.src = lc || srcUrl();
     paint();
     var pr = a.play(); if (pr && pr.catch) pr.catch(function () { if (P.a === a && P.state === 'loading') { P.state = 'paused'; paint(); } });
     try {
@@ -155,6 +155,71 @@
       paint();
     });
   }
+  /* ===== التحميل للاستماع أوفلاين ===== */
+  var DK = 'tamy_dl', dlBusy = false, dlStop = false;
+  function dlMap() { return lsGet(DK) || {}; }
+  function dlKey(rid, mi, n) { return rid + '_' + mi + '_' + n; }
+  function dlRel(rid, mi, n) { return 'quran/' + rid + '_' + mi + '/' + pad3(n) + '.mp3'; }
+  function FSP() { var C = window.Capacitor; return C && C.Plugins && C.Plugins.Filesystem; }
+  function dlLocal(rid, mi, n) { var p = dlMap()[dlKey(rid, mi, n)]; var C = window.Capacitor; return p && C && C.convertFileSrc ? C.convertFileSrc(p) : ''; }
+  function dlOne(r, mi, n) {
+    var fs = FSP(); if (!fs) return Promise.reject(new Error('nofs'));
+    var m0 = r.moshaf[mi] || r.moshaf[0], rel = dlRel(r.id, mi, n), res0;
+    return fs.downloadFile({ url: m0.server + pad3(n) + '.mp3', path: rel, directory: 'DATA', recursive: true }).then(function (res) {
+      res0 = res;
+      return fs.stat({ path: rel, directory: 'DATA' });
+    }).then(function (st) {
+      if (!st || st.size < 50000) { fs.deleteFile({ path: rel, directory: 'DATA' }).catch(function () {}); throw new Error('bad'); }
+      var m = dlMap(); m[dlKey(r.id, mi, n)] = res0.path || st.uri; lsSet(DK, m);
+    });
+  }
+  function dlDel(r, mi, n) {
+    var fs = FSP(), m = dlMap(); delete m[dlKey(r.id, mi, n)]; lsSet(DK, m);
+    return fs ? fs.deleteFile({ path: dlRel(r.id, mi, n), directory: 'DATA' }).catch(function () {}) : Promise.resolve();
+  }
+  function dlBtn(rid, mi, n) {
+    return '<button type="button" class="ls-dl" data-n="' + n + '" aria-label="تحميل">' + (dlMap()[dlKey(rid, mi, n)] ? '✓' : '⬇') + '</button>';
+  }
+  function dlBar() {
+    return '<div class="ls-bulk"><button type="button" class="chip" id="lsDlAll">⬇ تحميل الكل</button><button type="button" class="chip" id="lsDlDel">حذف المحمّل</button><small id="lsDlSt"></small></div>';
+  }
+  function bindDl(r, mi, l) {
+    function refresh(n) { var b = $('.ls-dl[data-n="' + n + '"]'); if (b) b.textContent = dlMap()[dlKey(r.id, mi, n)] ? '✓' : '⬇'; }
+    function stat() { var s = $('#lsDlSt'); if (!s) return; var m = dlMap(), k = 0; l.forEach(function (n) { if (m[dlKey(r.id, mi, n)]) k++; }); s.textContent = 'محمّل: ' + ar(k) + ' من ' + ar(l.length); }
+    stat();
+    $$('.ls-dl').forEach(function (b) {
+      b.onclick = function () {
+        var n = +b.getAttribute('data-n');
+        if (dlMap()[dlKey(r.id, mi, n)]) { dlDel(r, mi, n).then(function () { refresh(n); stat(); T.toast('تم الحذف'); }); return; }
+        if (dlBusy) { T.toast('هناك تحميل جارٍ'); return; }
+        dlBusy = true; b.textContent = '…';
+        dlOne(r, mi, n).then(function () { T.toast('تم التحميل'); }).catch(function () { T.toast('تعذّر التحميل. تأكد من الإنترنت'); }).then(function () { dlBusy = false; refresh(n); stat(); });
+      };
+    });
+    var all = $('#lsDlAll'), del = $('#lsDlDel');
+    if (all) all.onclick = function () {
+      if (dlBusy) { dlStop = true; return; }
+      if (!confirm('سيتم تحميل كل سور هذا الشيخ على الموبايل وقد تستهلك مساحة كبيرة (قد تتجاوز 1 جيجا). متابعة؟')) return;
+      dlBusy = true; dlStop = false; all.textContent = '■ إيقاف';
+      var todo = l.filter(function (n) { return !dlMap()[dlKey(r.id, mi, n)]; }), i = 0, fails = 0;
+      (function nxt() {
+        if (dlStop || i >= todo.length) {
+          dlBusy = false; all.textContent = '⬇ تحميل الكل'; stat();
+          T.toast(fails ? 'انتهى مع ' + ar(fails) + ' أخطاء' : (dlStop ? 'تم الإيقاف' : 'تم التحميل'));
+          return;
+        }
+        var n = todo[i++], s = $('#lsDlSt'); if (s) s.textContent = 'جارٍ تحميل ' + ar(i) + ' من ' + ar(todo.length) + '…';
+        dlOne(r, mi, n).catch(function () { fails++; if (fails >= 3) dlStop = true; }).then(function () { refresh(n); nxt(); });
+      })();
+    };
+    if (del) del.onclick = function () {
+      if (dlBusy) return;
+      if (!confirm('حذف كل السور المحمّلة لهذا الشيخ؟')) return;
+      var m = dlMap(), ks = l.filter(function (n) { return m[dlKey(r.id, mi, n)]; });
+      Promise.all(ks.map(function (n) { return dlDel(r, mi, n); })).then(function () { l.forEach(function (n) { refresh(n); }); stat(); T.toast('تم الحذف'); });
+    };
+  }
+
   function reciter(id) {
     T.view('<div class="page">' + head('الشيخ', '#/listen') + '<div class="q-loading">جارٍ التحميل…</div></div>', 'page');
     load().then(function () {
@@ -165,11 +230,12 @@
         var m = r.moshaf[mi], l = surahsOf(m);
         T.view('<div class="page">' + head(esc(r.name), '#/listen') +
           (r.moshaf.length > 1 ? '<div class="chips tabs" id="lsMo">' + r.moshaf.map(function (x, i) { return '<button type="button" class="chip' + (i === mi ? ' on' : '') + '" data-i="' + i + '">' + esc(x.name || ('تسجيل ' + ar(i + 1))) + '</button>'; }).join('') + '</div>' : '') +
-          '<div id="lsList">' + l.map(function (n) {
+          dlBar() + '<div id="lsList">' + l.map(function (n) {
             var s = SU.list[n - 1]; if (!s) return '';
-            return '<button type="button" class="srow ls-row" data-r="' + r.id + '" data-n="' + n + '"><span class="ls-n">' + ar(n) + '</span><span class="sr-tx"><b class="mush">سورة ' + s.name + '</b><small>' + ar(s.ayahs) + ' آية</small></span><span class="ls-pl">' + I.play + '</span></button>';
+            return '<div class="ls-w"><button type="button" class="srow ls-row" data-r="' + r.id + '" data-n="' + n + '"><span class="ls-n">' + ar(n) + '</span><span class="sr-tx"><b class="mush">سورة ' + s.name + '</b><small>' + ar(s.ayahs) + ' آية</small></span><span class="ls-pl">' + I.play + '</span></button>' + dlBtn(r.id, mi, n) + '</div>';
           }).join('') + '</div></div>', 'page');
         $$('.ls-row').forEach(function (b) { b.onclick = function () { play(r.id, mi, +b.getAttribute('data-n')); }; });
+        bindDl(r, mi, l);
         $$('#lsMo .chip').forEach(function (c) { c.onclick = function () { mi = +c.getAttribute('data-i'); draw(); }; });
         paint();
       }
