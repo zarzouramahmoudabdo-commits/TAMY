@@ -50,7 +50,7 @@
   }
   function auto() {
     var last = +lsGet(CKEY) || 0;
-    if (Date.now() - last < 3600 * 1000) return;           // مرة كل ساعة على الأكثر
+    if (Date.now() - last < 600 * 1000) return;            // مرة كل ١٠ دقائق على الأكثر
     myBuild().then(function (c) {
       if (!c) return;
       return latest().then(function (info) {
