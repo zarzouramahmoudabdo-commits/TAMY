@@ -165,7 +165,9 @@
   function dlOne(r, mi, n) {
     var fs = FSP(); if (!fs) return Promise.reject(new Error('nofs'));
     var m0 = r.moshaf[mi] || r.moshaf[0], rel = dlRel(r.id, mi, n), res0;
-    return fs.downloadFile({ url: m0.server + pad3(n) + '.mp3', path: rel, directory: 'DATA', recursive: true }).then(function (res) {
+    return fs.mkdir({ path: 'quran/' + r.id + '_' + mi, directory: 'DATA', recursive: true }).catch(function () { /* موجود */ }).then(function () {
+      return fs.downloadFile({ url: m0.server + pad3(n) + '.mp3', path: rel, directory: 'DATA', recursive: true });
+    }).then(function (res) {
       res0 = res;
       return fs.stat({ path: rel, directory: 'DATA' });
     }).then(function (st) {
