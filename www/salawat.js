@@ -41,7 +41,7 @@
     var ln = LN(); if (!ln) return Promise.resolve(false);
     return perm(ln).then(function (ok) {
       if (!ok) return false;
-      var ch = { id: 'salawat2', name: 'الصلاة على النبي', description: 'تذكير بالصلاة على النبي ﷺ', importance: 4, visibility: 1, vibration: true };
+      var ch = { id: 'salawat3', name: 'الصلاة على النبي', description: 'تذكير بالصلاة على النبي ﷺ', importance: 4, visibility: 1, vibration: true };
       if (feat.salawat) ch.sound = 'salawat.mp3';
       return ln.createChannel(ch).catch(function () { }).then(function () { return ln.getPending(); }).then(function (pend) {
         var old = (pend.notifications || []).filter(function (n) { return n.id >= BASE && n.id < BASE + 1000; }).map(function (n) { return { id: n.id }; });
@@ -49,7 +49,7 @@
       }).then(function () {
         if (!cfg.on) return true;
         var list = times().map(function (at, i) {
-          var n = { id: BASE + i, title: 'صلِّ على سيدنا محمد ﷺ', body: 'اللهم صلِّ وسلِّم وبارك على سيدنا محمد', schedule: { at: at, allowWhileIdle: true }, channelId: 'salawat2' };
+          var n = { id: BASE + i, title: 'صلِّ على سيدنا محمد ﷺ', body: 'اللهم صلِّ وسلِّم وبارك على سيدنا محمد', schedule: { at: at, allowWhileIdle: true }, channelId: 'salawat3' };
           if (feat.salawat) n.sound = 'salawat.mp3';
           return n;
         });
@@ -64,7 +64,7 @@
 
   function everyLabel(m) { return m < 60 ? ar(m) + ' دقيقة' : (m === 60 ? 'ساعة' : m === 120 ? 'ساعتين' : ar(m / 60) + ' ساعات'); }
   function page() {
-    var EV = [15, 30, 60, 120, 180];
+    var EV = [5, 15, 30, 60, 120, 180];
     cfg = load();
     T.view('<div class="page">' +
       '<div class="pg-head"><h1>الصلاة على النبي ﷺ</h1><a class="rd-btn" href="#/settings" aria-label="رجوع">' + I.back + '</a></div>' +
@@ -86,7 +86,7 @@
       var ln = LN(); if (!ln) { T.toast('التنبيهات تعمل داخل تطبيق الأندرويد فقط'); return; }
       schedule().then(function () { return perm(ln); }).then(function (ok) {
         if (!ok) { T.toast('فعّل إذن الإشعارات للتطبيق من إعدادات الهاتف'); return; }
-        var n = { id: 9997, title: 'صلِّ على سيدنا محمد ﷺ', body: 'اللهم صلِّ وسلِّم وبارك على سيدنا محمد', schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, channelId: 'salawat2' };
+        var n = { id: 9997, title: 'صلِّ على سيدنا محمد ﷺ', body: 'اللهم صلِّ وسلِّم وبارك على سيدنا محمد', schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, channelId: 'salawat3' };
         if (feat.salawat) n.sound = 'salawat.mp3';
         ln.schedule({ notifications: [n] }).then(function () { T.toast('سيصلك التنبيه بعد ٥ ثوانٍ'); });
       });
