@@ -19,15 +19,15 @@ function find(base) {
 function hasFfmpeg() { try { cp.execSync('ffmpeg -version', { stdio: 'ignore' }); return true; } catch (e) { return false; } }
 
 fs.rmSync(wwwAudio, { recursive: true, force: true });
-const features = { adhan: false, adhanFajr: false };
+const features = { adhan: false, adhanFajr: false, salawat: false };
 const ff = hasFfmpeg();
 const haveAndroid = fs.existsSync(path.join(root, 'android'));
 if (haveAndroid) {
   fs.mkdirSync(raw, { recursive: true });
-  ['adhan', 'adhan_fajr'].forEach((n) => ['mp3', 'ogg', 'wav', 'm4a'].forEach((e) => fs.rmSync(path.join(raw, n + '.' + e), { force: true })));
+  ['adhan', 'adhan_fajr', 'salawat'].forEach((n) => ['mp3', 'ogg', 'wav', 'm4a'].forEach((e) => fs.rmSync(path.join(raw, n + '.' + e), { force: true })));
 }
 
-[['adhan', 'adhan'], ['adhan_fajr', 'adhanFajr']].forEach(([base, key]) => {
+[['adhan', 'adhan'], ['adhan_fajr', 'adhanFajr'], ['salawat', 'salawat']].forEach(([base, key]) => {
   const f = find(base);
   if (!f) { console.log('· لا يوجد ' + base + ' — سيُستخدم صوت الإشعار العادي لهذا الأذان'); return; }
   const ext = path.extname(f).toLowerCase();

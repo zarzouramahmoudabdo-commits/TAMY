@@ -163,7 +163,7 @@
         return Promise.all(chans.map(function (c) { return LN.createChannel(c).catch(function () { }); })).then(function () {
           return LN.getPending();
         }).then(function (pend) {
-          var old = (pend.notifications || []).map(function (n) { return { id: n.id }; });
+          var old = (pend.notifications || []).filter(function (n) { return n.id < 7000; }).map(function (n) { return { id: n.id }; });
           return old.length ? LN.cancel({ notifications: old }) : null;
         }).then(function () {
           var list = [], now = new Date(), c = st.city;
@@ -805,6 +805,9 @@
           '<div class="row col"><div class="theme-prev" id="thPrev">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</div></div>' +
           '<div class="row btns"><button class="btn ghost sm" id="thReset">إرجاع الألوان الأصلية</button></div>' +
         '</div>' +
+
+        '<h3 class="sh">الصلاة على النبي</h3>' +
+        '<div class="card"><a class="row" href="#/salawat"><span class="rt">تنبيه الصلاة على النبي ﷺ<small>اختر كل كم دقيقة وصوت التنبيه</small></span>' + I.back + '</a></div>' +
 
         '<h3 class="sh">العرض</h3>' +
         '<div class="card">' +
