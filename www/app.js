@@ -385,7 +385,7 @@
           '<div class="dates"><b>' + esc(hijri(now)) + '</b><small>' + esc(gregorian(now)) + '</small></div>' +
         '</div>' +
         '<div class="next-card" id="nextCard"></div>' +
-      '</header>' + quranCard +
+      '</header>' + quranCard + (window.TAMYUpdateCard ? window.TAMYUpdateCard() : '') +
       groups +
       '<section class="sec"><h2><span class="orn"></span>الأدوات<span class="orn"></span></h2><div class="tools">' + tools + '</div></section>' +
       '<div class="home-signature"><p class="foot">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p><small class="app-credit">تم عمل التطبيق بواسطة Mahmoud A Zarzoura</small></div>'

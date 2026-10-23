@@ -466,3 +466,11 @@ a.ls-card { color: inherit; text-decoration: none; }
 #updBar .ub-t { flex: 1; font-size: 14px; font-weight: 700; color: var(--gold2); }
 #updBar .ub-go { flex: none; padding: 8px 16px; border-radius: 20px; background: var(--gold); color: #3a2a00; font-weight: 700; font-size: 14px; text-decoration: none; }
 #updBar .ub-x { flex: none; font-size: 20px; padding: 2px 8px; color: var(--cream); }
+
+.upd-card { display: flex; align-items: center; gap: 12px; padding: 11px 14px; margin: 10px 0 12px; border-radius: 16px; background: rgba(255,255,255,.06); border: 1px solid var(--line); color: inherit; text-decoration: none; }
+.upd-card.has { background: linear-gradient(135deg, var(--t1, #14705a), var(--t3, #0a3a30)); border-color: var(--gold); }
+.uc-ic { position: relative; flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: rgba(0,0,0,.25); color: var(--gold2); }
+.uc-dot { position: absolute; top: -3px; left: -3px; width: 14px; height: 14px; border-radius: 50%; background: #ff4d4d; border: 2px solid var(--deep, #062b24); animation: blink 1.6s ease-in-out infinite; }
+.uc-tx { display: flex; flex-direction: column; min-width: 0; }
+.uc-tx b { font-size: 15px; color: var(--gold2); }
+.uc-tx small { font-size: 12px; color: var(--mute); }

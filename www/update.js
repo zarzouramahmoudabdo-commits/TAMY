@@ -6,11 +6,26 @@
   var ar = T.ar, I = T.I;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var REPO = 'zarzouramahmoudabdo-commits/TAMY';
-  var DKEY = 'tamy_upd_dismiss', CKEY = 'tamy_upd_last';
+  var DKEY = 'tamy_upd_dismiss', CKEY = 'tamy_upd_last', AKEY = 'tamy_upd_avail';
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* لا شيء */ } }
 
   var cur = 0;
+  function getAvail() {
+    var a = null; try { a = JSON.parse(lsGet(AKEY) || 'null'); } catch (e) { a = null; }
+    return (a && a.build && a.url && !(cur && a.build <= cur)) ? a : null;
+  }
+  function setAvail(info) { lsSet(AKEY, info ? JSON.stringify(info) : ''); }
+  var ICON = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>';
+  function cardHtml() {
+    var a = getAvail();
+    return '<a class="upd-card' + (a ? ' has' : '') + '" id="updCard" href="' + (a ? a.url : '#/update') + '"' + (a ? ' target="_blank" rel="noopener"' : '') + '>' +
+      '<span class="uc-ic">' + ICON + (a ? '<i class="uc-dot"></i>' : '') + '</span>' +
+      '<span class="uc-tx"><b>' + (a ? 'يوجد تحديث جديد' : 'التحديثات') + '</b><small>' + (a ? 'اضغط لتحميل أحدث نسخة' : 'تحقق من آخر نسخة للتطبيق') + '</small></span></a>';
+  }
+  function repaint() { var c = $('#updCard'); if (c) c.outerHTML = cardHtml(); }
+  window.TAMYUpdateCard = cardHtml;
+
   function myBuild() {
     if (cur) return Promise.resolve(cur);
     return fetch('version.json').then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { cur = +j.build || 0; return cur; }).catch(function () { return 0; });
@@ -40,10 +55,12 @@
       if (!c) return;
       return latest().then(function (info) {
         lsSet(CKEY, String(Date.now()));
+        setAvail(info && info.build > c ? info : null); repaint();
         if (info && info.build > c && String(info.build) !== lsGet(DKEY)) banner(info);
       });
     }).catch(function () { /* لا شيء: لا يظهر شيء بدون إنترنت */ });
   }
+  myBuild().then(repaint);
   setTimeout(auto, 4000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(auto, 2500); });
 
@@ -60,6 +77,7 @@
       myBuild().then(function (c) {
         return latest().then(function (info) {
           lsSet(CKEY, String(Date.now()));
+          setAvail(info && c && info.build > c ? info : null); repaint();
           if (!info) msg.textContent = 'لم أجد نسخة منشورة.';
           else if (!c) { msg.textContent = 'آخر نسخة منشورة رقمها ' + ar(info.build) + '.'; go.href = info.url; go.hidden = false; }
           else if (info.build > c) { msg.textContent = 'يوجد تحديث: النسخة ' + ar(info.build) + '. حمّله ثم افتح الملف واضغط تثبيت.'; go.href = info.url; go.hidden = false; }
