@@ -193,7 +193,7 @@
         if (dlMap()[dlKey(r.id, mi, n)]) { dlDel(r, mi, n).then(function () { refresh(n); stat(); T.toast('تم الحذف'); }); return; }
         if (dlBusy) { T.toast('هناك تحميل جارٍ'); return; }
         dlBusy = true; b.textContent = '…';
-        dlOne(r, mi, n).then(function () { T.toast('تم التحميل'); }).catch(function () { T.toast('تعذّر التحميل. تأكد من الإنترنت'); }).then(function () { dlBusy = false; refresh(n); stat(); });
+        dlOne(r, mi, n).then(function () { T.toast('تم التحميل'); }).catch(function (e) { T.toast('تعذّر التحميل: ' + String((e && (e.message || e.errorMessage || e.code)) || e).slice(0, 90)); }).then(function () { dlBusy = false; refresh(n); stat(); });
       };
     });
     var all = $('#lsDlAll'), del = $('#lsDlDel');
@@ -209,7 +209,7 @@
           return;
         }
         var n = todo[i++], s = $('#lsDlSt'); if (s) s.textContent = 'جارٍ تحميل ' + ar(i) + ' من ' + ar(todo.length) + '…';
-        dlOne(r, mi, n).catch(function () { fails++; if (fails >= 3) dlStop = true; }).then(function () { refresh(n); nxt(); });
+        dlOne(r, mi, n).catch(function (e) { fails++; T.toast('خطأ: ' + String((e && (e.message || e.errorMessage || e.code)) || e).slice(0, 90)); if (fails >= 3) dlStop = true; }).then(function () { refresh(n); nxt(); });
       })();
     };
     if (del) del.onclick = function () {
