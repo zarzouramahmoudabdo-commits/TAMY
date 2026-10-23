@@ -26,6 +26,27 @@
     T.view('<div class="empty">' + I.quran + '<h3>تعذّر تحميل المصحف</h3><p>ملف المصحف غير موجود في هذه النسخة أو تالف. أعد بناء التطبيق وتأكد أن خطوة تجهيز المصحف نجحت.</p><a class="btn gold" href="#/">الرئيسية</a></div>', 'page');
   }
 
+  /* ---------- التفسير الميسّر — بيانات محلية دون إنترنت ---------- */
+  var TF = null, tafsirLoading = null;
+  function loadTafsir() {
+    if (TF) return Promise.resolve(TF);
+    if (tafsirLoading) return tafsirLoading;
+    tafsirLoading = fetch('tafsir.json').then(function (r) {
+      if (!r.ok) throw new Error('tafsir http ' + r.status);
+      return r.json();
+    }).then(function (j) {
+      if (!j || !j.s || j.s.length !== 114) {
+        throw new Error('bad tafsir data');
+      }
+      TF = j.s;
+      return TF;
+    }).catch(function (e) {
+      tafsirLoading = null;
+      throw e;
+    });
+    return tafsirLoading;
+  }
+
   /* ---------- أدوات ---------- */
   function norm(t) {
     return String(t).replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g, '')
@@ -262,12 +283,31 @@
       var has = idx() > -1;
       T.sheet(
         '<h3>سورة ' + info.name + ' — آية ' + ar(a) + '</h3>' +
+        '<section class="vs-tafsir">' +
+          '<h4>التفسير الميسّر</h4>' +
+          '<p id="vsTafsir">جارٍ تحميل التفسير...</p>' +
+          '<small>المصدر: مجمع الملك فهد لطباعة المصحف الشريف</small>' +
+        '</section>' +
         '<div class="vs-btns">' +
           '<button class="btn ghost" id="vsMark">' + (has ? I.bookmarkFill + 'إزالة العلامة' : I.bookmark + 'وضع علامة هنا') + '</button>' +
           '<button class="btn ghost" id="vsCopy">' + I.copy + 'نسخ الآية</button>' +
           '<button class="btn ghost" id="vsShare">' + I.share + 'مشاركة</button>' +
         '</div>', function (root) {
           function close() { T.closeSheet(); if (sp) sp.classList.remove('sel'); }
+
+          loadTafsir().then(function (allTafsir) {
+            var box = $('#vsTafsir', root);
+            if (!box) return;
+            var chapter = allTafsir[n - 1];
+            var explanation = chapter && chapter[a];
+            box.textContent = explanation || 'التفسير غير متوفر لهذه الآية.';
+          }).catch(function () {
+            var box = $('#vsTafsir', root);
+            if (box) {
+              box.textContent = 'تعذّر تحميل ملف التفسير. تأكد من وجود tafsir.json داخل التطبيق.';
+            }
+          });
+
           $('#vsMark', root).onclick = function () {
             var i = idx();
             if (i > -1) { marks.splice(i, 1); T.toast('أُزيلت العلامة'); } else { marks.unshift({ s: n, a: a }); T.toast('وُضعت العلامة'); }
