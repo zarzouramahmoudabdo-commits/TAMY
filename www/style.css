@@ -461,3 +461,8 @@ body.ls-on #app { padding-bottom: 150px; }
 .ls-pl { margin-inline-start: auto; font-size: 18px; color: var(--gold2); }
 a.ls-card { color: inherit; text-decoration: none; }
 .ls-resume { width: 100%; text-align: right; }
+
+#updBar { position: fixed; z-index: 40; left: 10px; right: 10px; top: calc(var(--safe-t) + 8px); display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: linear-gradient(135deg, var(--t1, #14705a), var(--t3, #0a3a30)); border: 1px solid var(--gold); box-shadow: 0 8px 26px rgba(0,0,0,.45); }
+#updBar .ub-t { flex: 1; font-size: 14px; font-weight: 700; color: var(--gold2); }
+#updBar .ub-go { flex: none; padding: 8px 16px; border-radius: 20px; background: var(--gold); color: #3a2a00; font-weight: 700; font-size: 14px; text-decoration: none; }
+#updBar .ub-x { flex: none; font-size: 20px; padding: 2px 8px; color: var(--cream); }

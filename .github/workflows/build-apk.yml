@@ -40,6 +40,9 @@ jobs:
       - name: Generate launcher icons and splash
         run: npm run assets
 
+      - name: Write app version
+        run: echo '{"build":${{ github.run_number }}}' > www/version.json
+
       - name: Sync and patch Android project
         run: npm run sync
         env:
