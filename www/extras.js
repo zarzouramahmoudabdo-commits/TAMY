@@ -246,6 +246,7 @@
       });
     } catch (e) { /* لا شيء */ }
   })();
+  document.addEventListener('change', function (e) { if (e.target && e.target.id === 'stPrem' && window.TAMYPremSet) window.TAMYPremSet(e.target.checked); });
   T.addRoute(/^#\/daily$/, dailyPage);
   T.addRoute(/^#\/prayers$/, prayers);
   T.addRoute(/^#\/wird$/, wird);

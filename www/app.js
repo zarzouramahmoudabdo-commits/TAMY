@@ -838,6 +838,7 @@
 
         '<h3 class="sh">الصلاة على النبي</h3>' +
         '<div class="card"><a class="row" href="#/salawat"><span class="rt">تنبيه الصلاة على النبي ﷺ<small>اختر كل كم دقيقة وصوت التنبيه</small></span>' + I.back + '</a></div>' +
+        '<div class="card"><label class="row"><span class="rt">تذكير «هل صليت؟»<small>إشعار قبل نهاية وقت الصلاة لو لم تعلّمها في صلواتي</small></span><input type="checkbox" id="stPrem"' + (window.TAMYPremOn && window.TAMYPremOn() === false ? '' : ' checked') + '></label></div>' +
 
         '<h3 class="sh">العرض</h3>' +
         '<div class="card">' +
