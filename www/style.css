@@ -479,3 +479,29 @@ a.ls-card { color: inherit; text-decoration: none; }
 .ls-w .ls-row{flex:1;min-width:0}
 .ls-dl{flex:0 0 46px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:inherit;font-size:18px;cursor:pointer}
 .ls-bulk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+
+/* ===== extras ===== */
+.ex-card{display:flex;flex-direction:column;gap:6px;margin:10px 0;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:inherit;text-decoration:none}
+.ex-card b{font-size:18px;line-height:1.8}
+.ex-card small,.ex-sum small,.ex-prog small{opacity:.75}
+.ex-big{align-items:center;text-align:center;padding:22px 16px}
+.ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.ex-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:inherit;text-decoration:none}
+.ex-tile span{font-size:26px}
+.ex-sum{display:flex;flex-direction:column;align-items:center;margin:10px 0}
+.ex-sum b{font-size:22px}
+.ex-bulk{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.ex-pr.on{border-color:rgba(120,220,160,.6)}
+.ex-ck{font-size:18px;opacity:.9}
+.ex-bars{display:flex;gap:6px;align-items:flex-end;justify-content:space-between;margin:10px 0}
+.ex-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.ex-bar span{display:flex;align-items:flex-end;width:100%;height:70px;background:rgba(255,255,255,.06);border-radius:8px;overflow:hidden}
+.ex-bar i{display:block;width:100%;background:rgba(120,220,160,.7)}
+.ex-bar small{font-size:10px;opacity:.7}
+.ex-prog{margin:12px 0}
+.ex-prog span{display:block;height:10px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:6px}
+.ex-prog i{display:block;height:100%;background:rgba(230,190,90,.9)}
+.ex-row,.ex-f{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0}
+.ex-f{flex-direction:column;align-items:stretch}
+.ex-in{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:inherit;font-size:16px;box-sizing:border-box}
+.ex-row .ex-in{width:auto}
