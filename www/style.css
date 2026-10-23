@@ -505,3 +505,5 @@ a.ls-card { color: inherit; text-decoration: none; }
 .ex-f{flex-direction:column;align-items:stretch}
 .ex-in{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:inherit;font-size:16px;box-sizing:border-box}
 .ex-row .ex-in{width:auto}
+
+.ex-ask{border-color:rgba(230,190,90,.6);background:rgba(230,190,90,.1)}

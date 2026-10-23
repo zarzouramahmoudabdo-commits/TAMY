@@ -64,7 +64,7 @@
     return out;
   }
   var FEATURES = { adhan: false, adhanFajr: false };
-  var SCHED_VER = 3;   // يُرفع عند تغيير شكل التنبيهات ليُعاد جدولتها بعد التحديث
+  var SCHED_VER = 4;   // يُرفع عند تغيير شكل التنبيهات ليُعاد جدولتها بعد التحديث
   var S;
   try { S = merge(DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = clone(DEFAULTS); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* التخزين غير متاح */ } }
@@ -184,6 +184,31 @@
                 if (ch !== 'prayer') n.sound = ch + '.mp3';
                 list.push(n);
               });
+              (function () {
+                if (localStorage.getItem('tamy_prem') === '0') return;
+                var pk; try { pk = JSON.parse(localStorage.getItem('tamy_pray') || '{}') || {}; } catch (e) { pk = {}; }
+                var dk = day.getFullYear() + '-' + ('0' + (day.getMonth() + 1)).slice(-2) + '-' + ('0' + day.getDate()).slice(-2);
+                var dn = Math.floor((new Date(day.getFullYear(), day.getMonth(), day.getDate()) - new Date(2020, 0, 1)) / 864e5);
+                var mk = pk[dk] || {}, keys = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+                var ends = [t.sunrise, t.asr, t.maghrib, t.isha, null], nl = ['الشروق', 'العصر', 'المغرب', 'العشاء', ''];
+                keys.forEach(function (k, idx) {
+                  var s = t[k], e = ends[idx], at;
+                  if (!s || mk[k]) return;
+                  if (e) at = new Date(Math.max(s.getTime() + 20 * 60000, e.getTime() - 60 * 60000));
+                  else at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 23, 0, 0);
+                  if (at.getTime() <= now.getTime() + 5000) return;
+                  if (e && at.getTime() >= e.getTime()) return;
+                  var rem = e ? Math.round((e.getTime() - at.getTime()) / 60000) : 0;
+                  list.push({
+                    id: 5000 + (dn % 300) * 5 + idx,
+                    title: 'هل صليت ' + prayerLabel(k, s) + '؟',
+                    body: e ? ('باقي ' + (rem === 60 ? 'نحو ساعة' : rem + ' دقيقة') + ' على ' + nl[idx] + ' — اضغط لتعليمها في صلواتي') : 'لا تنسَ صلاة العشاء — اضغط لتعليمها في صلواتي',
+                    schedule: { at: at, allowWhileIdle: true },
+                    channelId: 'pcheck',
+                    extra: { route: '#/prayers', key: k }
+                  });
+                });
+              })();
             }
           }
           function hm(s) { var p = String(s || '06:00').split(':'); return { hour: parseInt(p[0], 10) || 0, minute: parseInt(p[1], 10) || 0 }; }

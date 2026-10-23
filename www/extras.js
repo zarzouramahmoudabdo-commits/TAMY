@@ -65,6 +65,24 @@
     while (cnt(m[dkey(d)]) === 5) { s++; d.setDate(d.getDate() - 1); }
     return s;
   }
+  var askKey = null;
+  function cancelRem(k) {
+    var ln = LN(), idx = PR.map(function (p) { return p[0]; }).indexOf(k);
+    if (!ln || idx < 0) return;
+    ln.cancel({ notifications: [{ id: 5000 + (dayNum() % 300) * 5 + idx }] }).catch(function () { /* لا شيء */ });
+  }
+  function askHtml(k, d) {
+    if (!k || d[k]) return '';
+    var nm = ''; PR.forEach(function (p) { if (p[0] === k) nm = p[1]; });
+    return '<div class="ex-card ex-big ex-ask"><b class="mush">هل صليت ' + nm + '؟</b><small>علّمها لو صليتها</small><div class="ex-bulk"><button type="button" class="chip" id="exAskY">✓ نعم، صليت</button><button type="button" class="chip" id="exAskN">لسه</button></div></div>';
+  }
+  function bindAsk(k) {
+    var y = $('#exAskY'), n = $('#exAskN');
+    if (y) y.onclick = function () {
+      var mm = pget(), kk = dkey(new Date()); mm[kk] = mm[kk] || {}; mm[kk][k] = 1; lsSet('tamy_pray', mm); cancelRem(k); T.toast('تقبّل الله'); prayers();
+    };
+    if (n) n.onclick = function () { prayers(); };
+  }
   function prayers() {
     var m = pget(), k = dkey(new Date()), d = m[k] || {}, bars = '', tot = 0, i;
     for (i = 6; i >= 0; i--) {
@@ -72,17 +90,19 @@
       var c = cnt(m[dkey(dt)]); tot += c;
       bars += '<div class="ex-bar"><span><i style="height:' + (c * 20) + '%"></i></span><b>' + ar(c) + '</b><small>' + WK[dt.getDay()] + '</small></div>';
     }
-    show(head('صلواتي', '#/') +
+    var ak = askKey; askKey = null;
+    show(head('صلواتي', '#/') + askHtml(ak, d) +
       '<div class="ex-sum"><b>' + ar(cnt(d)) + ' / ' + ar(5) + '</b><small>صلوات اليوم</small></div>' +
       '<div class="ex-sum"><b>' + ar(streak(m)) + '</b><small>أيام متتالية بدون تفويت</small></div>' +
       '<div id="exPr">' + PR.map(function (p) {
         return '<button type="button" class="srow ex-pr' + (d[p[0]] ? ' on' : '') + '" data-p="' + p[0] + '"><span class="sr-tx"><b class="mush">' + p[1] + '</b></span><span class="ex-ck">' + (d[p[0]] ? '✓' : '○') + '</span></button>';
       }).join('') + '</div>' +
       '<div class="ex-sum"><small>آخر ٧ أيام (' + ar(tot) + ' من ' + ar(35) + ')</small></div><div class="ex-bars">' + bars + '</div>');
+    bindAsk(ak);
     $$('.ex-pr').forEach(function (b) {
       b.onclick = function () {
         var mm = pget(), kk = dkey(new Date()), p = b.getAttribute('data-p');
-        mm[kk] = mm[kk] || {}; mm[kk][p] = mm[kk][p] ? 0 : 1; lsSet('tamy_pray', mm); prayers();
+        mm[kk] = mm[kk] || {}; mm[kk][p] = mm[kk][p] ? 0 : 1; lsSet('tamy_pray', mm); if (mm[kk][p]) cancelRem(p); prayers();
       };
     });
   }
@@ -199,6 +219,18 @@
   window.TAMYExtras = function () {
     return dailyCard() + '<div class="ex-grid">' + tile('#/wird', '📖', 'الورد والختمة') + tile('#/prayers', '🕌', 'صلواتي') + tile('#/occasions', '🌙', 'المناسبات') + tile('#/zakat', '💰', 'حاسبة الزكاة') + '</div>';
   };
+  (function () {
+    var ln = LN(); if (!ln) return;
+    try { ln.createChannel({ id: 'pcheck', name: 'تذكير تعليم الصلوات', description: 'هل صليت؟', importance: 4, visibility: 1, vibration: true }).catch(function () { /* موجودة */ }); } catch (e) { /* لا شيء */ }
+    try {
+      ln.addListener('localNotificationActionPerformed', function (a) {
+        var x = a && a.notification && a.notification.extra;
+        if (!x || x.route !== '#/prayers') return;
+        askKey = x.key || null;
+        if (location.hash === '#/prayers') prayers(); else location.hash = '#/prayers';
+      });
+    } catch (e) { /* لا شيء */ }
+  })();
   T.addRoute(/^#\/daily$/, dailyPage);
   T.addRoute(/^#\/prayers$/, prayers);
   T.addRoute(/^#\/wird$/, wird);
