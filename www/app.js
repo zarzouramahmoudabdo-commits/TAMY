@@ -247,6 +247,8 @@
     }
   };
 
+  window.TAMYNotif = Notif;
+
   /* ---------- الأذان داخل التطبيق ---------- */
   var player = { audio: null };
   function adhanFile(key) { return (key === 'fajr' && FEATURES.adhanFajr) ? FEATURES.adhanFajrFile : FEATURES.adhanFile; }

@@ -65,6 +65,20 @@
     while (cnt(m[dkey(d)]) === 5) { s++; d.setDate(d.getDate() - 1); }
     return s;
   }
+  function premOn() { try { return localStorage.getItem('tamy_prem') !== '0'; } catch (e) { return true; } }
+  function setPrem(on) {
+    try { localStorage.setItem('tamy_prem', on ? '1' : '0'); } catch (e) { /* لا شيء */ }
+    var ln = LN(), N = window.TAMYNotif;
+    if (!on) {
+      if (ln) ln.getPending().then(function (r) {
+        var ids = (r.notifications || []).filter(function (n) { return n.id >= 5000 && n.id < 6500; }).map(function (n) { return { id: n.id }; });
+        return ids.length ? ln.cancel({ notifications: ids }) : null;
+      }).catch(function () { /* لا شيء */ });
+    } else if (N && N.schedule) { try { N.schedule(true); } catch (e) { /* لا شيء */ } }
+    T.toast(on ? 'تم تفعيل تذكير هل صليت' : 'تم إيقاف تذكير هل صليت');
+  }
+  window.TAMYPremSet = setPrem; window.TAMYPremOn = premOn;
+  function bindPrem() { var c = $('#exPrem'); if (c) c.onchange = function () { setPrem(c.checked); }; }
   var askKey = null;
   function cancelRem(k) {
     var ln = LN(), idx = PR.map(function (p) { return p[0]; }).indexOf(k);
@@ -97,8 +111,9 @@
       '<div id="exPr">' + PR.map(function (p) {
         return '<button type="button" class="srow ex-pr' + (d[p[0]] ? ' on' : '') + '" data-p="' + p[0] + '"><span class="sr-tx"><b class="mush">' + p[1] + '</b></span><span class="ex-ck">' + (d[p[0]] ? '✓' : '○') + '</span></button>';
       }).join('') + '</div>' +
+      '<label class="ex-row"><span>تذكير "هل صليت؟" قبل نهاية وقت الصلاة</span><input type="checkbox" id="exPrem"' + (premOn() ? ' checked' : '') + '></label>' +
       '<div class="ex-sum"><small>آخر ٧ أيام (' + ar(tot) + ' من ' + ar(35) + ')</small></div><div class="ex-bars">' + bars + '</div>');
-    bindAsk(ak);
+    bindAsk(ak); bindPrem();
     $$('.ex-pr').forEach(function (b) {
       b.onclick = function () {
         var mm = pget(), kk = dkey(new Date()), p = b.getAttribute('data-p');
