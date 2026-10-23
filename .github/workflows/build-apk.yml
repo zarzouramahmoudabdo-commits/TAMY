@@ -43,6 +43,11 @@ jobs:
       - name: Write app version
         run: echo '{"build":${{ github.run_number }}}' > www/version.json
 
+      - name: Restore signing key
+        run: |
+          echo "${{ secrets.TAMY_KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/tamy.jks"
+          echo "TAMY_KEYSTORE_PATH=$RUNNER_TEMP/tamy.jks" >> "$GITHUB_ENV"
+          echo "TAMY_KEY_PASS=${{ secrets.TAMY_KEY_PASS }}" >> "$GITHUB_ENV"
       - name: Sync and patch Android project
         run: npm run sync
         env:

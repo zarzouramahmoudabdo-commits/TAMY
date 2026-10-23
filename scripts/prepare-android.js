@@ -70,6 +70,16 @@ console.log('✓ أيقونة الإشعار');
  * لا تفرض tamy.keystore لأنه غير موجود في GitHub Actions.
  */
 const gradle = path.join(A, 'app', 'build.gradle');
+
+/* توقيع ثابت: لو المفتاح موجود (من GitHub Secrets) وقّع به */
+if (process.env.TAMY_KEYSTORE_PATH && fs.existsSync(process.env.TAMY_KEYSTORE_PATH)) {
+  rw(gradle, (g) => {
+    if (g.indexOf('signingConfigs.tamy') > -1) return g;
+    const blk = "signingConfigs {\n        tamy {\n            storeFile file('" + process.env.TAMY_KEYSTORE_PATH.replace(/\\/g, '/') + "')\n            storePassword System.getenv('TAMY_KEY_PASS')\n            keyAlias 'tamy'\n            keyPassword System.getenv('TAMY_KEY_PASS')\n        }\n    }\n    buildTypes {\n        debug { signingConfig signingConfigs.tamy }\n        release { signingConfig signingConfigs.tamy }";
+    return g.replace(/buildTypes\s*\{/, blk);
+  });
+  console.log('✓ توقيع ثابت');
+}
 /* 5) رقم النسخة (يزيد مع كل بناء ليقبله أندرويد كتحديث) */
 if (process.env.VERSION_CODE) {
   rw(gradle, (s) => s
