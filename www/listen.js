@@ -33,7 +33,7 @@
   function load() {
     if (reciters) return Promise.resolve(reciters);
     if (loadingP) return loadingP;
-    loadingP = fetch(API).then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); }).then(function (j) {
+    loadingP = fetch('reciters.json').catch(function () { return fetch(API); }).then(function (r0) { return r0.ok ? r0 : fetch(API); }).then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); }).then(function (j) {
       var list = (j.reciters || []).map(clean).filter(function (r) { return r.moshaf.length; });
       if (!list.length) throw new Error('empty');
       reciters = list; offline = false; lsSet('tamy_reciters', list); return list;
