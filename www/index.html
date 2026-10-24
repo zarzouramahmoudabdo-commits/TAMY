@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b5d3b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TAMY">
+<title>TAMY — السيرة وقصص الأنبياء</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="top">
+  <button class="ic" data-act="back" aria-label="رجوع" id="btnBack">›</button>
+  <div class="brand" data-act="go" data-to="#/"><img src="icons/icon-192.png" alt="">TAMY</div>
+  <div class="top-actions">
+    <button class="ic" data-act="go" data-to="#/search" aria-label="بحث">🔍</button>
+    <button class="ic" data-act="update" aria-label="تحديث" title="تحديث التطبيق">🔄</button>
+  </div>
+</header>
+
+<div id="upd" class="upd" hidden>
+  🔔 يتوفر تحديث جديد للتطبيق
+  <button data-act="apply-update">تحديث الآن</button>
+</div>
+
+<main id="app"></main>
+
+<div id="player" hidden></div>
+
+<nav id="nav">
+  <a href="#/" data-n="home"><i>🏠</i>الرئيسية</a>
+  <a href="#/seerah" data-n="seerah"><i>🕌</i>السيرة</a>
+  <a href="#/prophets" data-n="prophets"><i>📖</i>الأنبياء</a>
+  <a href="#/lessons" data-n="lessons"><i>💡</i>الفوائد</a>
+  <a href="#/favs" data-n="favs"><i>♥</i>المفضلة</a>
+</nav>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="version.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

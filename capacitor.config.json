@@ -1,0 +1,12 @@
+{
+  "appId": "com.tamy.app",
+  "appName": "TAMY",
+  "webDir": "www",
+  "server": {
+    "url": "https://YOUR-USER.github.io/YOUR-REPO/",
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0b5d3b"
+  }
+}
