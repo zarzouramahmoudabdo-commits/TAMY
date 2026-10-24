@@ -152,28 +152,24 @@
   function adhanPicker() {
     var L = FEATURES.adhans || [];
     function grp(title, cur, attr) {
-      return '<div class="row"><span class="rt">' + title + '</span></div><div class="chips tabs" data-adh="' + attr + '">' +
-        L.map(function (a) { return '<button type="button" class="chip' + (cur && cur.id === a.id ? ' on' : '') + '" data-id="' + esc(a.id) + '">' + esc(a.label) + '</button>'; }).join('') + '</div>';
+      return '<div class="row ad-row"><span class="rt">' + title + '</span><select class="ad-sel" data-adh="' + attr + '">' +
+        L.map(function (a) { return '<option value="' + esc(a.id) + '"' + (cur && cur.id === a.id ? ' selected' : '') + '>' + esc(a.label) + '</option>'; }).join('') + '</select></div>';
     }
     return grp('أذان الصلوات', adhanSelOf('dhuhr'), 'adhanSel') + grp('أذان الفجر', adhanSelOf('fajr'), 'fajrSel') +
-      '<div class="row"><small>اضغط على أذان لاختياره وسماع جزء منه</small></div>';
+      '<div class="row"><small>عند الاختيار تسمع جزءًا من الأذان</small></div>';
   }
   var prevAudio = null, prevTimer = null;
   function stopPrev() { try { if (prevAudio) prevAudio.pause(); } catch (e) { /* لا شيء */ } prevAudio = null; clearTimeout(prevTimer); }
   function bindAdhanPick() {
-    Array.prototype.forEach.call(document.querySelectorAll('[data-adh]'), function (g) {
-      var attr = g.getAttribute('data-adh');
-      Array.prototype.forEach.call(g.querySelectorAll('.chip'), function (b) {
-        b.onclick = function () {
-          var id = b.getAttribute('data-id'), same = (adhanSelOf(attr === 'fajrSel' ? 'fajr' : 'dhuhr') || {}).id === id && !!prevAudio;
-          S.settings[attr] = id; save();
-          Array.prototype.forEach.call(g.querySelectorAll('.chip'), function (c) { c.classList.toggle('on', c === b); });
-          stopPrev(); if (same) return;
-          var a = (FEATURES.adhans || []).filter(function (x) { return x.id === id; })[0]; if (!a) return;
-          try { prevAudio = new Audio(a.file); var pr = prevAudio.play(); if (pr && pr.catch) pr.catch(function () { /* لا شيء */ }); prevTimer = setTimeout(stopPrev, 12000); } catch (e) { /* لا شيء */ }
-          reschedule();
-        };
-      });
+    Array.prototype.forEach.call(document.querySelectorAll('select[data-adh]'), function (sel) {
+      sel.onchange = function () {
+        var attr = sel.getAttribute('data-adh'), id = sel.value;
+        S.settings[attr] = id; save();
+        stopPrev();
+        var a = (FEATURES.adhans || []).filter(function (x) { return x.id === id; })[0]; if (!a) return;
+        try { prevAudio = new Audio(a.file); var pr = prevAudio.play(); if (pr && pr.catch) pr.catch(function () { /* لا شيء */ }); prevTimer = setTimeout(stopPrev, 12000); } catch (e) { /* لا شيء */ }
+        reschedule();
+      };
     });
   }
   function adhanChannel(key) {
