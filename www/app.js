@@ -64,7 +64,7 @@
     return out;
   }
   var FEATURES = { adhan: false, adhanFajr: false };
-  var SCHED_VER = 4;   // يُرفع عند تغيير شكل التنبيهات ليُعاد جدولتها بعد التحديث
+  var SCHED_VER = 5;   // يُرفع عند تغيير شكل التنبيهات ليُعاد جدولتها بعد التحديث
   var S;
   try { S = merge(DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = clone(DEFAULTS); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* التخزين غير متاح */ } }
@@ -132,8 +132,54 @@
 
   /* ---------- التنبيهات (Capacitor Local Notifications) ---------- */
   // أي قناة تُستخدم لتنبيه الصلاة: قناة الأذان إن كان مفعّلًا ومتوفرًا، وإلا القناة العادية
+  function adhanSelOf(key) {
+    var L = FEATURES.adhans || [], i, want, hasFajr = false;
+    if (!L.length) return null;
+    for (i = 0; i < L.length; i++) if (L[i].id === 'adhan_fajr') hasFajr = true;
+    want = key === 'fajr' ? (S.settings.fajrSel || (hasFajr ? 'adhan_fajr' : (S.settings.adhanSel || 'adhan'))) : (S.settings.adhanSel || 'adhan');
+    for (i = 0; i < L.length; i++) if (L[i].id === want) return L[i];
+    return L[0];
+  }
+  function testSound() { var a = adhanSelOf('dhuhr'); return a ? { ch: a.ch, snd: a.ch + '.mp3' } : { ch: 'adhan2', snd: 'adhan.mp3' }; }
+  function cleanupChans(chans) {
+    var LN = Notif.plugin();
+    if (!LN || !LN.listChannels) return null;
+    var keep = chans.map(function (c) { return c.id; });
+    return LN.listChannels().then(function (r) {
+      return Promise.all((r.channels || []).filter(function (c) { return /^adh_/.test(c.id) && keep.indexOf(c.id) < 0; }).map(function (c) { return LN.deleteChannel({ id: c.id }).catch(function () { }); }));
+    }).catch(function () { });
+  }
+  function adhanPicker() {
+    var L = FEATURES.adhans || [];
+    function grp(title, cur, attr) {
+      return '<div class="row"><span class="rt">' + title + '</span></div><div class="chips tabs" data-adh="' + attr + '">' +
+        L.map(function (a) { return '<button type="button" class="chip' + (cur && cur.id === a.id ? ' on' : '') + '" data-id="' + esc(a.id) + '">' + esc(a.label) + '</button>'; }).join('') + '</div>';
+    }
+    return grp('أذان الصلوات', adhanSelOf('dhuhr'), 'adhanSel') + grp('أذان الفجر', adhanSelOf('fajr'), 'fajrSel') +
+      '<div class="row"><small>اضغط على أذان لاختياره وسماع جزء منه</small></div>';
+  }
+  var prevAudio = null, prevTimer = null;
+  function stopPrev() { try { if (prevAudio) prevAudio.pause(); } catch (e) { /* لا شيء */ } prevAudio = null; clearTimeout(prevTimer); }
+  function bindAdhanPick() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-adh]'), function (g) {
+      var attr = g.getAttribute('data-adh');
+      Array.prototype.forEach.call(g.querySelectorAll('.chip'), function (b) {
+        b.onclick = function () {
+          var id = b.getAttribute('data-id'), same = (adhanSelOf(attr === 'fajrSel' ? 'fajr' : 'dhuhr') || {}).id === id && !!prevAudio;
+          S.settings[attr] = id; save();
+          Array.prototype.forEach.call(g.querySelectorAll('.chip'), function (c) { c.classList.toggle('on', c === b); });
+          stopPrev(); if (same) return;
+          var a = (FEATURES.adhans || []).filter(function (x) { return x.id === id; })[0]; if (!a) return;
+          try { prevAudio = new Audio(a.file); var pr = prevAudio.play(); if (pr && pr.catch) pr.catch(function () { /* لا شيء */ }); prevTimer = setTimeout(stopPrev, 12000); } catch (e) { /* لا شيء */ }
+          reschedule();
+        };
+      });
+    });
+  }
   function adhanChannel(key) {
-    if (!S.settings.adhan || !FEATURES.adhan) return 'prayer';
+    if (!S.settings.adhan) return 'prayer';
+    var sel = adhanSelOf(key); if (sel) return sel.ch;
+    if (!FEATURES.adhan) return 'prayer';
     return (key === 'fajr' && FEATURES.adhanFajr) ? 'adhan_fajr2' : 'adhan2';
   }
   var Notif = {
@@ -160,7 +206,10 @@
         ];
         if (FEATURES.adhan) chans.push({ id: 'adhan2', name: 'الأذان', description: 'صوت الأذان عند دخول وقت الصلاة', importance: 5, visibility: 1, vibration: true, sound: 'adhan.mp3' });
         if (FEATURES.adhanFajr) chans.push({ id: 'adhan_fajr2', name: 'أذان الفجر', description: 'أذان الفجر', importance: 5, visibility: 1, vibration: true, sound: 'adhan_fajr.mp3' });
+        (FEATURES.adhans || []).forEach(function (a) { chans.push({ id: a.ch, name: 'الأذان — ' + a.label, description: 'صوت الأذان', importance: 5, visibility: 1, vibration: true, sound: a.ch + '.mp3' }); });
         return Promise.all(chans.map(function (c) { return LN.createChannel(c).catch(function () { }); })).then(function () {
+          return cleanupChans(chans);
+        }).then(function () {
           return LN.getPending();
         }).then(function (pend) {
           var old = (pend.notifications || []).filter(function (n) { return n.id < 7000; }).map(function (n) { return { id: n.id }; });
@@ -236,7 +285,7 @@
       if (!FEATURES.adhan) { toast('لم يُضف ملف الأذان إلى هذه النسخة'); return; }
       Notif.schedule(true).then(function () { return Notif.ensurePermission(); }).then(function (ok) {
         if (!ok) { toast('فعّل إذن الإشعارات للتطبيق من إعدادات الهاتف'); return; }
-        LN.schedule({ notifications: [{ id: 9998, title: 'تجربة الأذان', body: 'هكذا سيصلك تنبيه الصلاة', schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, channelId: 'adhan2', sound: 'adhan.mp3' }] })
+        LN.schedule({ notifications: [{ id: 9998, title: 'تجربة الأذان', body: 'هكذا سيصلك تنبيه الصلاة', schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, channelId: testSound().ch, sound: testSound().snd }] })
           .then(function () { toast('سيصلك الأذان بعد ٥ ثوانٍ'); });
       });
     },
@@ -251,7 +300,7 @@
 
   /* ---------- الأذان داخل التطبيق ---------- */
   var player = { audio: null };
-  function adhanFile(key) { return (key === 'fajr' && FEATURES.adhanFajr) ? FEATURES.adhanFajrFile : FEATURES.adhanFile; }
+  function adhanFile(key) { var a = adhanSelOf(key); if (a) return a.file; return (key === 'fajr' && FEATURES.adhanFajr) ? FEATURES.adhanFajrFile : FEATURES.adhanFile; }
   function stopAdhan() {
     try { if (player.audio) { player.audio.pause(); player.audio = null; } } catch (e) { /* لا شيء */ }
     var b = $('#adhanBar'); if (b) b.remove();
@@ -812,6 +861,7 @@
           sw('nKahf', 'تذكير الجمعة', 'سورة الكهف والصلاة على النبي ﷺ') +
           '<div class="row btns"><button class="btn ghost sm" id="stTest">' + I.bell + 'تنبيه تجريبي</button><button class="btn ghost sm" id="stExact">تنبيهات دقيقة</button></div>' +
           (FEATURES.adhan ? '<div class="row btns"><button class="btn ghost sm" id="stAdhan">' + I.bell + 'تجربة الأذان كإشعار</button><button class="btn ghost sm" id="stAdhanPlay">' + I.play + 'تشغيل الأذان كاملًا</button></div>' : '') +
+        (FEATURES.adhans && FEATURES.adhans.length > 1 ? adhanPicker() : '') +
         '</div>' +
         '<p class="note">إن لم تصلك التنبيهات في وقتها: اضغط «تنبيهات دقيقة» وفعّلها، واسمح للتطبيق بالعمل في الخلفية من إعدادات البطارية.</p>' +
 
@@ -863,6 +913,7 @@
     });
     $('#stTest').onclick = Notif.test;
     if ($('#stAdhan')) { $('#stAdhan').onclick = Notif.testAdhan; $('#stAdhanPlay').onclick = function () { playAdhan('dhuhr', 'الأذان'); }; }
+    bindAdhanPick();
     $('#stExact').onclick = Notif.exact;
     $('#stCity').onchange = function (e) {
       if (e.target.value === '') return;

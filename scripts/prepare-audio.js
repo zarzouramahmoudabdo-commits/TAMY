@@ -50,5 +50,41 @@ if (haveAndroid) {
   fs.copyFileSync(f, path.join(raw, base + (ext === '.m4a' ? '.mp3' : ext)));
 });
 
+/* ===== قائمة الأذانات المتعددة (assets/audio/adhans/*.mp3 + الأذانين القديمين) ===== */
+const crypto = require('crypto');
+const adhDir = path.join(src, 'adhans');
+const LABELS = { adhan: 'الأذان الأول', adhan_fajr: 'أذان الفجر الأصلي' };
+try { Object.assign(LABELS, JSON.parse(fs.readFileSync(path.join(adhDir, 'labels.json'), 'utf8'))); } catch (e) { /* لا شيء */ }
+const cands = [];
+['adhan', 'adhan_fajr'].forEach((b) => { const f = find(b); if (f) cands.push({ id: b, f }); });
+if (fs.existsSync(adhDir)) fs.readdirSync(adhDir).sort().forEach((n) => {
+  const m = /^(.+)\.(mp3|ogg|wav|m4a)$/i.exec(n); if (!m) return;
+  const id = m[1].toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || ('a' + cands.length);
+  if (cands.some((c) => c.id === id)) return;
+  cands.push({ id, f: path.join(adhDir, n) });
+});
+fs.mkdirSync(wwwAudio, { recursive: true });
+if (haveAndroid && fs.existsSync(raw)) fs.readdirSync(raw).filter((n) => /^adh_/.test(n)).forEach((n) => fs.rmSync(path.join(raw, n), { force: true }));
+features.adhans = [];
+cands.forEach((c) => {
+  const h = crypto.createHash('sha1').update(fs.readFileSync(c.f)).digest('hex').slice(0, 6);
+  const ch = 'adh_' + c.id + '_' + h, ext = path.extname(c.f).toLowerCase();
+  fs.copyFileSync(c.f, path.join(wwwAudio, ch + ext));
+  if (haveAndroid) {
+    const out = path.join(raw, ch + '.mp3');
+    let ok = false;
+    if (ff) {
+      try {
+        cp.execFileSync('ffmpeg', ['-y', '-i', c.f, '-t', String(CLIP_SECONDS), '-af', 'afade=t=out:st=' + (CLIP_SECONDS - 5) + ':d=5', '-ac', '2', '-ar', '44100', '-c:a', 'libmp3lame', '-q:a', '5', out], { stdio: 'ignore' });
+        ok = true;
+      } catch (e) { /* لا شيء */ }
+    }
+    if (!ok) fs.copyFileSync(c.f, ext === '.m4a' ? out : path.join(raw, ch + ext));
+  }
+  features.adhans.push({ id: c.id, label: LABELS[c.id] || c.id, ch, file: 'audio/' + ch + ext });
+  console.log('✓ أذان: ' + c.id + ' → ' + ch);
+});
+if (features.adhans.length) features.adhan = true;
+
 fs.writeFileSync(path.join(www, 'features.json'), JSON.stringify(features));
 console.log('features.json:', JSON.stringify(features));
