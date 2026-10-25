@@ -41,7 +41,10 @@ jobs:
         run: npm run assets
 
       - name: Write app version
-        run: echo '{"build":${{ github.run_number }}}' > www/version.json
+        run: |
+          L=$(cat native-level.txt 2>/dev/null || echo 1)
+          echo "NLEVEL=$L" >> "$GITHUB_ENV"
+          echo "{\"build\":${{ github.run_number }},\"level\":$L}" > www/version.json
 
       - name: Restore signing key
         run: |
@@ -52,8 +55,12 @@ jobs:
         run: npm run sync
         env:
           VERSION_CODE: ${{ github.run_number }}
-          VERSION_NAME: 1.${{ github.run_number }}
+          VERSION_NAME: 1.${{ github.run_number }}.${{ env.NLEVEL }}
 
+      - name: Pack live update bundle
+        run: |
+          cd android/app/src/main/assets/public
+          zip -qr "$GITHUB_WORKSPACE/www_l${NLEVEL}.zip" .
       - name: Build APK
         working-directory: android
         run: |
@@ -73,4 +80,6 @@ jobs:
         with:
           tag_name: build-${{ github.run_number }}
           name: TAMY build ${{ github.run_number }}
-          files: TAMY.apk
+          files: |
+            TAMY.apk
+            www_l${{ env.NLEVEL }}.zip

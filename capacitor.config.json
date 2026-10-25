@@ -11,6 +11,11 @@
     "LocalNotifications": {
       "smallIcon": "ic_stat_tamy",
       "iconColor": "#e6bf63"
+    },
+    "CapacitorUpdater": {
+      "autoUpdate": false,
+      "resetWhenUpdate": true,
+      "appReadyTimeout": 15000
     }
   }
 }
