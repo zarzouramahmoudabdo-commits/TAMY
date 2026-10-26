@@ -61,6 +61,8 @@ jobs:
         run: |
           cd android/app/src/main/assets/public
           zip -qr "$GITHUB_WORKSPACE/www_l${NLEVEL}.zip" .
+      - name: Add in-app APK installer
+        run: python3 scripts/android-installer.py
       - name: Build APK
         working-directory: android
         run: |
