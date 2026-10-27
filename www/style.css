@@ -542,3 +542,7 @@ a.ls-card { color: inherit; text-decoration: none; }
 
 .ad-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ad-sel{flex:1;max-width:60%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:inherit;font-size:15px;font-family:inherit}
+
+.upd-sheet{text-align:center;padding:8px 4px 4px}
+.us-t{font-size:18px;margin:10px 0 18px}
+.us-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}

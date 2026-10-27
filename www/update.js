@@ -121,5 +121,40 @@
     if (!/^https?:/.test(url)) return;
     if (startInstall(url)) e.preventDefault();
   }, true);
+  /* ===== نافذة «تحديث التطبيق» ===== */
+  function showUpdateSheet() {
+    if (!T.sheet) { location.hash = '#/update'; return; }
+    T.sheet('<div class="upd-sheet"><p class="us-t" id="usMsg">جارٍ التحقق من التحديثات…</p><div class="us-b" id="usBtns"></div></div>');
+    function close() { try { if (T.closeSheet) T.closeSheet(); } catch (e) { /* لا شيء */ } }
+    function set(msg, btns) {
+      var m = $('#usMsg'), b = $('#usBtns'); if (!m || !b) return;
+      m.textContent = msg; b.innerHTML = '';
+      btns.forEach(function (x) {
+        var el = document.createElement('button'); el.type = 'button'; el.className = 'btn ' + (x.gold ? 'gold' : 'ghost') + ' sm'; el.textContent = x.t;
+        el.onclick = x.f; b.appendChild(el);
+      });
+    }
+    function run() {
+      set('جارٍ التحقق من التحديثات…', []);
+      myBuild().then(function (c) {
+        return latest().then(function (info) {
+          lsSet(CKEY, String(Date.now()));
+          var has = !!(info && (!c || info.build > c));
+          setAvail(has ? info : null); repaint();
+          if (!info) set('لم أجد نسخة منشورة بعد', [{ t: 'إغلاق', f: close }]);
+          else if (has) set('يوجد تحديث جديد للتطبيق', [
+            { t: 'تحديث', gold: true, f: function () { close(); if (!startInstall(info.url)) window.open(info.url, '_blank'); } },
+            { t: 'لاحقًا', f: close }]);
+          else set('✓ أنت تستخدم أحدث إصدار من التطبيق', [{ t: 'إغلاق', f: close }]);
+        });
+      }).catch(function () { set('تعذّر التحقق. تأكد من الإنترنت', [{ t: 'إعادة المحاولة', gold: true, f: run }, { t: 'إغلاق', f: close }]); });
+    }
+    setTimeout(run, 0);
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target && e.target.closest ? e.target.closest('a[href="#/update"]') : null;
+    if (!t) return;
+    e.preventDefault(); showUpdateSheet();
+  }, true);
   T.addRoute(/^#\/update$/, page);
 })();

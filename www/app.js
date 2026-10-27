@@ -880,7 +880,7 @@
         '</div>' +
 
         '<h3 class="sh">التحديثات</h3>' +
-        '<div class="card"><a class="row" href="#/update"><span class="rt">التحقق من التحديثات<small>تحميل أحدث نسخة من التطبيق</small></span>' + I.back + '</a></div>' +
+        '<div class="card"><a class="row" href="#/update"><span class="rt">تحديث التطبيق<small>تنزيل آخر إصدار وتثبيته من داخل التطبيق</small></span>' + I.back + '</a></div>' +
 
         '<h3 class="sh">الصلاة على النبي</h3>' +
         '<div class="card"><a class="row" href="#/salawat"><span class="rt">تنبيه الصلاة على النبي ﷺ<small>اختر كل كم دقيقة وصوت التنبيه</small></span>' + I.back + '</a></div>' +
