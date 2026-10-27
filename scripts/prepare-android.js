@@ -56,6 +56,9 @@ rw(styles, (s) => {
   return s.replace(/(<style name="AppTheme\.NoActionBar"[^>]*>)/, '$1\n        <item name="android:statusBarColor">#062B24</item>\n        <item name="android:navigationBarColor">#041F1A</item>');
 });
 
+/* إذن تثبيت التحديث من داخل التطبيق */
+rw(path.join(A, 'app', 'src', 'main', 'AndroidManifest.xml'), (s) => s.indexOf('REQUEST_INSTALL_PACKAGES') > -1 ? s : s.replace('</manifest>', '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n</manifest>'));
+
 /* 3) أيقونة الإشعار الصغيرة */
 ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'].forEach((d) => {
   const src = path.join(root, 'assets', 'notif', 'ic_stat_tamy-' + d + '.png');

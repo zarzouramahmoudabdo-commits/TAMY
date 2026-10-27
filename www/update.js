@@ -80,11 +80,46 @@
           setAvail(info && c && info.build > c ? info : null); repaint();
           if (!info) msg.textContent = 'لم أجد نسخة منشورة.';
           else if (!c) { msg.textContent = 'آخر نسخة منشورة رقمها ' + ar(info.build) + '.'; go.href = info.url; go.hidden = false; }
-          else if (info.build > c) { msg.textContent = 'يوجد تحديث: النسخة ' + ar(info.build) + '. حمّله ثم افتح الملف واضغط تثبيت.'; go.href = info.url; go.hidden = false; }
+          else if (info.build > c) { msg.textContent = 'يوجد تحديث: النسخة ' + ar(info.build) + '. اضغط «تحميل التحديث» وسيبدأ التثبيت تلقائيًا.'; go.href = info.url; go.hidden = false; }
           else msg.textContent = 'أنت على آخر نسخة.';
         });
       }).catch(function () { msg.textContent = 'تعذّر التحقق. تأكد من الإنترنت وأعد المحاولة.'; });
     };
   }
+  /* ===== تحميل وتثبيت التحديث من داخل التطبيق ===== */
+  var installing = false;
+  function startInstall(url) {
+    var C = window.Capacitor, PL = C && C.Plugins, FS = PL && PL.Filesystem, FO = PL && PL.FileOpener;
+    if (!FS || !FO) return false;                       // نسخة قديمة بلا الإضافة: يفتح الرابط كالسابق
+    if (installing) return true;
+    installing = true;
+    var bar = $('#updBar'); if (!bar) { bar = document.createElement('div'); bar.id = 'updBar'; document.body.appendChild(bar); }
+    function say(t) { bar.innerHTML = '<span class="ub-t">' + t + '</span>'; }
+    function fail(m) { installing = false; bar.innerHTML = '<span class="ub-t">' + m + '</span><button type="button" class="ub-x" aria-label="إغلاق">×</button>'; var x = $('.ub-x', bar); if (x) x.onclick = function () { bar.remove(); }; }
+    say('جارٍ تحميل التحديث… ' + ar(0) + '٪');
+    var lis = null;
+    try { lis = FS.addListener('progress', function (p) { if (p && p.contentLength) say('جارٍ تحميل التحديث… ' + ar(Math.round(p.bytes / p.contentLength * 100)) + '٪'); }); } catch (e) { /* لا شيء */ }
+    function done() { try { if (lis && lis.then) lis.then(function (h) { h.remove(); }); else if (lis && lis.remove) lis.remove(); } catch (e) { /* لا شيء */ } }
+    FS.deleteFile({ path: 'TAMY-update.apk', directory: 'CACHE' }).catch(function () { /* لا شيء */ }).then(function () {
+      return FS.downloadFile({ url: url, path: 'TAMY-update.apk', directory: 'CACHE', progress: true, recursive: true });
+    }).then(function () {
+      return FS.getUri({ path: 'TAMY-update.apk', directory: 'CACHE' });
+    }).then(function (r) {
+      done(); say('تم التحميل. اضغط «تثبيت» في الشاشة التالية…');
+      return FO.open({ filePath: r.uri, contentType: 'application/vnd.android.package-archive', openWithDefault: true });
+    }).then(function () {
+      installing = false; setTimeout(function () { if (bar.parentNode) bar.remove(); }, 4000);
+    }).catch(function (e) {
+      done(); fail('تعذّر التحديث: ' + String((e && (e.message || e.errorMessage)) || e).slice(0, 80) + '. فعّل «تثبيت التطبيقات من هذا المصدر» وأعد المحاولة');
+    });
+    return true;
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target && e.target.closest ? e.target.closest('.ub-go, #updCard, #upGo') : null;
+    if (!t) return;
+    var url = t.getAttribute('href') || '';
+    if (!/^https?:/.test(url)) return;
+    if (startInstall(url)) e.preventDefault();
+  }, true);
   T.addRoute(/^#\/update$/, page);
 })();
