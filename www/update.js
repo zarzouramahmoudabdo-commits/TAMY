@@ -67,24 +67,24 @@
   function page() {
     T.view('<div class="page">' +
       '<div class="pg-head"><h1>التحديثات</h1><a class="rd-btn" href="#/settings" aria-label="رجوع">' + I.back + '</a></div>' +
-      '<div class="card"><div class="row col"><span class="rt">رقم النسخة الحالية<small id="upCur">…</small></span>' +
+      '<div class="card"><div class="row col"><span class="rt">التحديثات<small>تحقق من وجود نسخة أحدث للتطبيق</small></span>' +
       '<button type="button" class="btn gold sm" id="upCheck">تحقق من وجود تحديث</button>' +
-      '<p class="note" id="upMsg"></p><a class="btn ghost sm" id="upGo" target="_blank" rel="noopener" hidden>تحميل التحديث</a></div></div>' +
+      '<p class="note" id="upMsg"></p><a class="btn ghost sm" id="upGo" target="_blank" rel="noopener" style="display:none">تحميل التحديث</a></div></div>' +
       '</div>', 'page');
-    myBuild().then(function (c) { $('#upCur').textContent = c ? ar(c) : 'غير معروف (نسخة تجريبية)'; });
     $('#upCheck').onclick = function () {
-      var msg = $('#upMsg'), go = $('#upGo'); go.hidden = true; msg.textContent = 'جارٍ التحقق…';
+      var msg = $('#upMsg'), go = $('#upGo'); go.style.display = 'none'; msg.textContent = 'جارٍ التحقق…';
       myBuild().then(function (c) {
         return latest().then(function (info) {
           lsSet(CKEY, String(Date.now()));
           setAvail(info && c && info.build > c ? info : null); repaint();
           if (!info) msg.textContent = 'لم أجد نسخة منشورة.';
-          else if (!c) { msg.textContent = 'آخر نسخة منشورة رقمها ' + ar(info.build) + '.'; go.href = info.url; go.hidden = false; }
-          else if (info.build > c) { msg.textContent = 'يوجد تحديث: النسخة ' + ar(info.build) + '. اضغط «تحميل التحديث» وسيبدأ التثبيت تلقائيًا.'; go.href = info.url; go.hidden = false; }
+          else if (!c) { msg.textContent = 'يوجد تحديث جديد.'; go.href = info.url; go.style.display = ''; }
+          else if (info.build > c) { msg.textContent = 'يوجد تحديث جديد. اضغط «تحميل التحديث» وسيبدأ التثبيت تلقائيًا.'; go.href = info.url; go.style.display = ''; }
           else msg.textContent = 'أنت على آخر نسخة.';
         });
       }).catch(function () { msg.textContent = 'تعذّر التحقق. تأكد من الإنترنت وأعد المحاولة.'; });
     };
+    setTimeout(function () { var b = $('#upCheck'); if (b) b.click(); }, 300);
   }
   /* ===== تحميل وتثبيت التحديث من داخل التطبيق ===== */
   var installing = false;
