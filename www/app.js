@@ -464,14 +464,14 @@
       '<header class="hero">' +
         '<div class="hero-top">' +
           '<div><div class="salam">السلام عليكم ورحمة الله</div><div class="greet">' + greeting(now) + '</div></div>' +
-          '<div class="dates"><b>' + esc(hijri(now)) + '</b><small>' + esc(gregorian(now)) + '</small></div>' +
+          '<div class="dates"><b>' + esc(hijri(now)) + '</b><small>' + esc(gregorian(now)) + '</small><span class="cr"><i>تم عمل التطبيق بواسطة</i><b>Mahmoud A Zarzoura</b></span></div>' +
         '</div>' +
         '<div class="next-card" id="nextCard"></div>' +
       '</header>' + quranCard + (window.TAMYExtras ? window.TAMYExtras() : '') +
       groups +
       '<section class="sec"><h2><span class="orn"></span>الأدوات<span class="orn"></span></h2><div class="tools">' + tools + '</div></section>' +
       '<div class="upd-end">' + (window.TAMYUpdateCard ? window.TAMYUpdateCard() : '') + '</div>' +
-      '<div class="home-signature"><p class="foot">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p><small class="app-credit">تم عمل التطبيق بواسطة Mahmoud A Zarzoura</small></div>'
+      '<div class="home-signature"><p class="foot">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p></div>'
     );
     (function () {
       Array.prototype.forEach.call(document.querySelectorAll('.azk-rail'), function (rail) {
