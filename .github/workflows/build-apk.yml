@@ -40,11 +40,12 @@ jobs:
       - name: Generate launcher icons and splash
         run: npm run assets
 
-      - name: Write app version
+      - name: Native fingerprint and shell URL
         run: |
-          L=$(cat native-level.txt 2>/dev/null || echo 1)
-          echo "NLEVEL=$L" >> "$GITHUB_ENV"
-          echo "{\"build\":${{ github.run_number }},\"level\":$L}" > www/version.json
+          NH=$( (cat capacitor.config.json package.json scripts/android-installer.py scripts/ApkInstallerPlugin.java scripts/prepare-android.js scripts/prepare-audio.js; find assets -type f | sort | xargs sha256sum) | sha256sum | cut -c1-8)
+          echo "NH=$NH" >> "$GITHUB_ENV"
+          echo "{\"build\":${{ github.run_number }}}" > www/version.json
+          node scripts/set-url.js "https://zarzouramahmoudabdo-commits.github.io/TAMY/?apk=${{ github.run_number }}&nh=$NH"
 
       - name: Restore signing key
         run: |
@@ -55,12 +56,8 @@ jobs:
         run: npm run sync
         env:
           VERSION_CODE: ${{ github.run_number }}
-          VERSION_NAME: 1.${{ github.run_number }}.${{ env.NLEVEL }}
+          VERSION_NAME: 1.${{ github.run_number }}
 
-      - name: Pack live update bundle
-        run: |
-          cd android/app/src/main/assets/public
-          zip -qr "$GITHUB_WORKSPACE/www_l${NLEVEL}.zip" .
       - name: Add in-app APK installer
         run: python3 scripts/android-installer.py
       - name: Build APK
@@ -82,6 +79,5 @@ jobs:
         with:
           tag_name: build-${{ github.run_number }}
           name: TAMY build ${{ github.run_number }}
-          files: |
-            TAMY.apk
-            www_l${{ env.NLEVEL }}.zip
+          files: TAMY.apk
+          body: build ${{ github.run_number }} native ${{ env.NH }}

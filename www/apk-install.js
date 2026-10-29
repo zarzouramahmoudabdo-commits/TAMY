@@ -50,6 +50,7 @@
     }).catch(function (e) { fail(e && e.message || e); });
   }
 
+  window.TAMYApkInstall = run;
   // اعتراض الضغط على روابط الـ APK قبل أن يفتحها المتصفح
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('#updCard.has, #updBar .ub-go, #upGo');

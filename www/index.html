@@ -29,6 +29,6 @@
   <script src="update.js"></script>
   <script src="apk-install.js"></script>
   <script src="extras.js"></script>
-  <script src="liveupdate.js"></script>
+  <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(function () {}); }</script>
 </body>
 </html>
