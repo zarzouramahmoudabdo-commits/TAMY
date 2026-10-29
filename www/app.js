@@ -431,8 +431,18 @@
     var now = new Date(), today = dayKey(now), sug = suggested(now);
     var favCount = S.fav.length;
     var groups = D.groups.map(function (g) {
-      var tiles = D.categories.filter(function (c) { return c.group === g.id; }).map(function (c) { return tileHtml(c, sug, today); }).join('');
-      return '<section class="sec"><h2><span class="orn"></span>' + g.title + '<span class="orn"></span></h2><div class="grid">' + tiles + '</div></section>';
+      var cats = D.categories.filter(function (c) { return c.group === g.id; });
+      var isRail = cats.some(function (c) { return c.id === 'morning'; });
+      if (isRail && sug) cats = cats.filter(function (c) { return c.id === sug; }).concat(cats.filter(function (c) { return c.id !== sug; }));
+      var tiles = cats.map(function (c) {
+        if (!isRail) return tileHtml(c, sug, today);
+        var dn = S.done[today] && S.done[today][c.id];
+        return '<a class="azk-card tone-' + c.tone + (sug === c.id ? ' sug on' : '') + '" href="#/read/' + c.id + '">' +
+          '<span class="azk-ic">' + I[c.icon] + '</span>' +
+          (dn ? '<span class="azk-bd ok">' + I.check + '</span>' : (sug === c.id ? '<span class="azk-bd">الآن</span>' : '')) +
+          '<span class="azk-tt">' + esc(c.title) + '</span><span class="azk-sub">' + esc(c.sub) + '</span></a>';
+      }).join('');
+      return '<section class="sec"><h2><span class="orn"></span>' + g.title + '<span class="orn"></span></h2>' + (isRail ? '<div class="azk-rail">' : '<div class="grid">') + tiles + '</div></section>';
     }).join('');
 
     var tools = [
@@ -457,11 +467,23 @@
           '<div class="dates"><b>' + esc(hijri(now)) + '</b><small>' + esc(gregorian(now)) + '</small></div>' +
         '</div>' +
         '<div class="next-card" id="nextCard"></div>' +
-      '</header>' + quranCard + (window.TAMYUpdateCard ? window.TAMYUpdateCard() : '') + (window.TAMYExtras ? window.TAMYExtras() : '') +
-      groups +
+      '</header>' + quranCard + (window.TAMYExtras ? window.TAMYExtras() : '') +
+      groups + (window.TAMYDailyCard ? window.TAMYDailyCard() : '') +
       '<section class="sec"><h2><span class="orn"></span>الأدوات<span class="orn"></span></h2><div class="tools">' + tools + '</div></section>' +
+      '<div class="upd-end">' + (window.TAMYUpdateCard ? window.TAMYUpdateCard() : '') + '</div>' +
       '<div class="home-signature"><p class="foot">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p><small class="app-credit">تم عمل التطبيق بواسطة Mahmoud A Zarzoura</small></div>'
     );
+    (function () {
+      var rail = document.querySelector('.azk-rail'); if (!rail) return;
+      var cs = rail.querySelectorAll('.azk-card'), raf = 0;
+      function mark() {
+        raf = 0; var r = rail.getBoundingClientRect(), mid = r.left + r.width / 2, best = null, bd = 1e9;
+        for (var i = 0; i < cs.length; i++) { var b = cs[i].getBoundingClientRect(), d = Math.abs(b.left + b.width / 2 - mid); if (d < bd) { bd = d; best = cs[i]; } }
+        for (var j = 0; j < cs.length; j++) cs[j].classList.toggle('on', cs[j] === best);
+      }
+      rail.addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(mark); }, { passive: true });
+      mark();
+    })();
 
     function tick() {
       var n = new Date(), nx = nextPrayer(n), t = nx.today;

@@ -232,7 +232,9 @@
   /* ===== الرئيسية ===== */
   function tile(h, ic, t) { return '<a class="ex-tile" href="' + h + '"><span>' + ic + '</span><b>' + t + '</b></a>'; }
   window.TAMYExtras = function () {
-    return dailyCard() + '<div class="ex-grid">' + tile('#/wird', '📖', 'الورد والختمة') + tile('#/prayers', '🕌', 'صلواتي') + tile('#/occasions', '🌙', 'المناسبات') + tile('#/zakat', '💰', 'حاسبة الزكاة') + '</div>';
+    window.TAMYDailyCard = dailyCard;
+    var cs = [['#/prayers', '🕌', 'صلواتي'], ['#/wird', '📖', 'الورد والختمة'], ['#/occasions', '🌙', 'المناسبات'], ['#/zakat', '💰', 'الزكاة']];
+    return '<div class="ex-chips">' + cs.map(function (x) { return '<a class="ex-chip" href="' + x[0] + '"><span class="ex-ci">' + x[1] + '</span><b>' + x[2] + '</b></a>'; }).join('') + '</div>';
   };
   (function () {
     var ln = LN(); if (!ln) return;
