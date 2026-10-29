@@ -880,7 +880,7 @@
         '</div>' +
 
         '<h3 class="sh">التحديثات</h3>' +
-        '<div class="card"><a class="row" href="#/update"><span class="rt">تحديث التطبيق<small>تنزيل آخر إصدار وتثبيته من داخل التطبيق</small></span>' + I.back + '</a></div>' +
+        '<div class="card"><div class="row"><span class="rt">مصدر الصفحة<small>' + location.origin + '</small></span></div><a class="row" href="#" onclick="return window.TAMYRefresh()"><span class="rt">تحديث الموقع<small>مسح الكاش وإعادة تحميل التطبيق</small></span></a><a class="row" href="#/update"><span class="rt">تحديث التطبيق<small>تنزيل آخر إصدار وتثبيته من داخل التطبيق</small></span>' + I.back + '</a></div>' +
 
         '<h3 class="sh">الصلاة على النبي</h3>' +
         '<div class="card"><a class="row" href="#/salawat"><span class="rt">تنبيه الصلاة على النبي ﷺ<small>اختر كل كم دقيقة وصوت التنبيه</small></span>' + I.back + '</a></div>' +

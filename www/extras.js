@@ -253,3 +253,15 @@
   T.addRoute(/^#\/occasions$/, occasions);
   T.addRoute(/^#\/zakat$/, zakat);
 })();
+
+
+window.TAMYRefresh = function () {
+  var go = function () { location.reload(); };
+  try {
+    var p = [];
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) p.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+    if (window.caches && caches.keys) p.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+    Promise.all(p).then(go, go);
+  } catch (er) { go(); }
+  return false;
+};
