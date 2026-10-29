@@ -176,7 +176,7 @@
   function dlKey(rid, mi, n) { return rid + '_' + mi + '_' + n; }
   function dlRel(rid, mi, n) { return 'quran/' + rid + '_' + mi + '/' + pad3(n) + '.mp3'; }
   function FSP() { var C = window.Capacitor; return C && C.Plugins && C.Plugins.Filesystem; }
-  function dlLocal(rid, mi, n) { var p = dlMap()[dlKey(rid, mi, n)]; var C = window.Capacitor; return p && C && C.convertFileSrc ? C.convertFileSrc(p) : ''; }
+  function dlLocal(rid, mi, n) { var p = dlMap()[dlKey(rid, mi, n)]; var C = window.Capacitor; if (!(p && C && C.convertFileSrc)) return ''; var u = C.convertFileSrc(p); var i = u.indexOf('/_capacitor_file_'); if (i > 0) u = 'https://localhost' + u.slice(i); return u; }
   function dlOne(r, mi, n) {
     var fs = FSP(); if (!fs) return Promise.reject(new Error('nofs'));
     var m0 = r.moshaf[mi] || r.moshaf[0], rel = dlRel(r.id, mi, n), res0;
