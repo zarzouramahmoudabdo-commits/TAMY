@@ -102,7 +102,22 @@
     a.onpause = function () { if (P.a === a && P.state === 'on' && !a.ended) { P.state = 'paused'; paint(); } };
     a.onwaiting = function () { if (P.a === a && P.state === 'on') { P.state = 'loading'; paint(); } };
     a.onended = function () { if (P.a === a) step(1, true); };
-    a.onerror = function () { if (P.a === a && a._loc) { a._loc = false; a.src = srcUrl(); a.play(); return; } if (P.a === a) { P.err = a.error ? a.error.code : 0; P.state = 'paused'; paint(); T.toast('تعذّر تشغيل الصوت. تأكد من الإنترنت'); } };
+    a.onerror = function () { if (P.a === a && a._loc === true) {
+        a._loc = 'blob';
+        var lu = dlLocal(P.rid, P.mi, P.n);
+        fetch(lu).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.blob(); }).then(function (bl) {
+          if (P.a !== a) return;
+          try { if (window.lsObj) URL.revokeObjectURL(window.lsObj); } catch (e) { /* لا شيء */ }
+          window.lsObj = URL.createObjectURL(bl); a.src = window.lsObj;
+          var p2 = a.play(); if (p2 && p2.catch) p2.catch(function () { /* لا شيء */ });
+        }).catch(function (er) {
+          if (P.a !== a) return;
+          a._loc = false; T.toast('تعذّر فتح الملف المحمّل: ' + String((er && er.message) || er).slice(0, 60));
+          a.src = srcUrl(); var p3 = a.play(); if (p3 && p3.catch) p3.catch(function () { /* لا شيء */ });
+        });
+        return;
+      }
+      if (P.a === a && a._loc === 'blob') { a._loc = false; T.toast('تعذّر تشغيل الملف المحمّل'); a.src = srcUrl(); a.play(); return; } if (P.a === a) { P.err = a.error ? a.error.code : 0; P.state = 'paused'; paint(); T.toast('تعذّر تشغيل الصوت. تأكد من الإنترنت'); } };
     a.ontimeupdate = a.onloadedmetadata = tick;
     var lc = dlLocal(rid, mi, n); a._loc = !!lc; a.src = lc || srcUrl();
     paint();

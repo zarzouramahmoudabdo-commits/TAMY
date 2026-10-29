@@ -12,6 +12,7 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET' || req.headers.has('range')) return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.indexOf('/_capacitor_file_') > -1) return;
   e.respondWith(netFirst(req));
 });
 async function netFirst(req) {
