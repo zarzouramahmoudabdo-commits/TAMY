@@ -256,6 +256,7 @@
 
 
 window.TAMYRefresh = function () {
+  if (navigator.onLine === false) { if (window.TAMY && window.TAMY.toast) window.TAMY.toast('اتصل بالإنترنت أولًا'); return false; }
   var go = function () { location.reload(); };
   try {
     var p = [];
