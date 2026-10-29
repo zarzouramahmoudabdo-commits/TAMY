@@ -249,33 +249,27 @@
     } catch (e) { /* لا شيء */ }
   })();
   document.addEventListener('change', function (e) { if (e.target && e.target.id === 'stPrem' && window.TAMYPremSet) window.TAMYPremSet(e.target.checked); });
-  var dlOpen = false, dlHid = 0;
-  function dlEsc(s) { return String(s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
+  var dlOpen = false;
   function dailyPop() {
     if (dlOpen) return;
     var h = location.hash; if (h && h !== '#/' && h !== '#') return;
-    var lf = [];
-    try {
-      var box = document.createElement('div'); box.innerHTML = dailyCard();
-      box.querySelectorAll('*').forEach(function (n) { if (!n.children.length) { var t = (n.textContent || '').trim(); if (t) lf.push(t); } });
-    } catch (er) { return; }
-    if (lf.length && lf[0] === 'ذكر اليوم') lf.shift();
-    if (!lf.length) return;
+    var day = new Date().toDateString();
+    try { if (localStorage.getItem('tamy_pop_day') === day) return; } catch (er) { /* لا شيء */ }
     dlOpen = true;
+    try { localStorage.setItem('tamy_pop_day', day); } catch (er2) { /* لا شيء */ }
     var o = document.createElement('div'); o.className = 'dl-ov';
-    o.innerHTML = '<div class="dl-box"><div class="dl-orn">﴾ ✦ ﴿</div><div class="dl-lb">ذكر اليوم</div><div class="dl-tx">' + dlEsc(lf[0]) + '</div>' +
-      (lf[1] ? '<div class="dl-src">' + dlEsc(lf[1]) + '</div>' : '') +
-      '<div class="dl-ac"><a class="dl-more" href="#/daily">المزيد</a><button class="dl-ok" type="button">جزاك الله خيرًا</button></div><div class="dl-cr"><i>تم عمل التطبيق بواسطة</i><b>Mahmoud A Zarzoura</b></div></div>';
+    o.innerHTML = '<div class="dl-box"><button class="dl-x" type="button" aria-label="إغلاق">✕</button>' +
+      '<div class="dl-orn">﴾ ✦ ﴿</div><div class="dl-lb">تذكير</div>' +
+      '<div class="dl-tx">صَلِّ على نبينا وحبيبنا محمد ﷺ</div>' +
+      '<div class="dl-src">اللهم صلِّ وسلِّم وبارك عليه</div>' +
+      '<div class="dl-ac"><button class="dl-ok" type="button">اللهم صلِّ وسلِّم عليه</button></div>' +
+      '<div class="dl-cr"><i>تم عمل التطبيق بواسطة</i><b>Mahmoud A Zarzoura</b></div></div>';
     function close() { o.classList.remove('in'); setTimeout(function () { if (o.parentNode) o.parentNode.removeChild(o); dlOpen = false; }, 250); }
-    o.addEventListener('click', function (ev) { var t = ev.target; if (t === o || (t.classList && (t.classList.contains('dl-ok') || t.classList.contains('dl-more')))) close(); });
+    o.addEventListener('click', function (ev) { var x = ev.target; if (x === o || (x.classList && (x.classList.contains('dl-ok') || x.classList.contains('dl-x')))) close(); });
     document.body.appendChild(o);
     requestAnimationFrame(function () { o.classList.add('in'); });
   }
   setTimeout(dailyPop, 900);
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden) dlHid = Date.now();
-    else if (dlHid && Date.now() - dlHid > 600000) setTimeout(dailyPop, 400);
-  });
   T.addRoute(/^#\/daily$/, dailyPage);
   T.addRoute(/^#\/prayers$/, prayers);
   T.addRoute(/^#\/wird$/, wird);
