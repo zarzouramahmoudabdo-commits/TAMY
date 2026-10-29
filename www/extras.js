@@ -265,7 +265,7 @@
     var o = document.createElement('div'); o.className = 'dl-ov';
     o.innerHTML = '<div class="dl-box"><div class="dl-orn">﴾ ✦ ﴿</div><div class="dl-lb">ذكر اليوم</div><div class="dl-tx">' + dlEsc(lf[0]) + '</div>' +
       (lf[1] ? '<div class="dl-src">' + dlEsc(lf[1]) + '</div>' : '') +
-      '<div class="dl-ac"><a class="dl-more" href="#/daily">المزيد</a><button class="dl-ok" type="button">جزاك الله خيرًا</button></div></div>';
+      '<div class="dl-ac"><a class="dl-more" href="#/daily">المزيد</a><button class="dl-ok" type="button">جزاك الله خيرًا</button></div><div class="dl-cr"><i>تم عمل التطبيق بواسطة</i><b>Mahmoud A Zarzoura</b></div></div>';
     function close() { o.classList.remove('in'); setTimeout(function () { if (o.parentNode) o.parentNode.removeChild(o); dlOpen = false; }, 250); }
     o.addEventListener('click', function (ev) { var t = ev.target; if (t === o || (t.classList && (t.classList.contains('dl-ok') || t.classList.contains('dl-more')))) close(); });
     document.body.appendChild(o);
