@@ -570,3 +570,17 @@ a.ls-card { color: inherit; text-decoration: none; }
 /* ===== التحديثات في آخر الصفحة ===== */
 .upd-end{margin:20px 0 6px;opacity:.92}
 .upd-end>*{margin-block:0}
+
+
+/* ===== نافذة ذكر اليوم ===== */
+.dl-ov{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:rgba(5,6,9,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;transition:opacity .25s ease}
+.dl-ov.in{opacity:1}
+.dl-box{width:100%;max-width:380px;text-align:center;padding:26px 22px 20px;border-radius:30px;border:1px solid rgba(232,200,114,.45);background:radial-gradient(120% 90% at 50% 0%,rgba(201,162,75,.22),transparent 60%),linear-gradient(170deg,#1b1d25,#101218);box-shadow:0 24px 60px rgba(0,0,0,.6);transform:translateY(18px) scale(.94);transition:transform .3s cubic-bezier(.2,.9,.3,1.2)}
+.dl-ov.in .dl-box{transform:none}
+.dl-orn{color:#e8c872;letter-spacing:6px;font-size:15px;opacity:.9}
+.dl-lb{margin-top:6px;font-size:14px;color:#e8c872;opacity:.85}
+.dl-tx{margin:16px 0 10px;font-size:24px;font-weight:800;line-height:1.7;color:#fff}
+.dl-src{font-size:14px;opacity:.65}
+.dl-ac{display:flex;gap:10px;margin-top:22px}
+.dl-more{flex:0 0 auto;padding:12px 18px;border-radius:16px;border:1px solid rgba(255,255,255,.14);color:inherit;text-decoration:none;font-size:15px}
+.dl-ok{flex:1;padding:12px;border:0;border-radius:16px;font:inherit;font-weight:800;font-size:16px;color:#1a1305;background:linear-gradient(135deg,#f0d588,#c9a24b)}

@@ -233,7 +233,7 @@
   function tile(h, ic, t) { return '<a class="ex-tile" href="' + h + '"><span>' + ic + '</span><b>' + t + '</b></a>'; }
   window.TAMYExtras = function () {
     window.TAMYDailyCard = dailyCard;
-    var cs = [['#/prayers', '🕌', 'صلواتي'], ['#/wird', '📖', 'الورد والختمة'], ['#/occasions', '🌙', 'المناسبات'], ['#/zakat', '💰', 'الزكاة']];
+    var cs = [['#/daily', '☀️', 'ذكر اليوم'], ['#/prayers', '🕌', 'صلواتي'], ['#/wird', '📖', 'الورد والختمة'], ['#/occasions', '🌙', 'المناسبات'], ['#/zakat', '💰', 'الزكاة']];
     return '<div class="ex-chips">' + cs.map(function (x) { return '<a class="ex-chip" href="' + x[0] + '"><span class="ex-ci">' + x[1] + '</span><b>' + x[2] + '</b></a>'; }).join('') + '</div>';
   };
   (function () {
@@ -249,6 +249,33 @@
     } catch (e) { /* لا شيء */ }
   })();
   document.addEventListener('change', function (e) { if (e.target && e.target.id === 'stPrem' && window.TAMYPremSet) window.TAMYPremSet(e.target.checked); });
+  var dlOpen = false, dlHid = 0;
+  function dlEsc(s) { return String(s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
+  function dailyPop() {
+    if (dlOpen) return;
+    var h = location.hash; if (h && h !== '#/' && h !== '#') return;
+    var lf = [];
+    try {
+      var box = document.createElement('div'); box.innerHTML = dailyCard();
+      box.querySelectorAll('*').forEach(function (n) { if (!n.children.length) { var t = (n.textContent || '').trim(); if (t) lf.push(t); } });
+    } catch (er) { return; }
+    if (lf.length && lf[0] === 'ذكر اليوم') lf.shift();
+    if (!lf.length) return;
+    dlOpen = true;
+    var o = document.createElement('div'); o.className = 'dl-ov';
+    o.innerHTML = '<div class="dl-box"><div class="dl-orn">﴾ ✦ ﴿</div><div class="dl-lb">ذكر اليوم</div><div class="dl-tx">' + dlEsc(lf[0]) + '</div>' +
+      (lf[1] ? '<div class="dl-src">' + dlEsc(lf[1]) + '</div>' : '') +
+      '<div class="dl-ac"><a class="dl-more" href="#/daily">المزيد</a><button class="dl-ok" type="button">جزاك الله خيرًا</button></div></div>';
+    function close() { o.classList.remove('in'); setTimeout(function () { if (o.parentNode) o.parentNode.removeChild(o); dlOpen = false; }, 250); }
+    o.addEventListener('click', function (ev) { var t = ev.target; if (t === o || (t.classList && (t.classList.contains('dl-ok') || t.classList.contains('dl-more')))) close(); });
+    document.body.appendChild(o);
+    requestAnimationFrame(function () { o.classList.add('in'); });
+  }
+  setTimeout(dailyPop, 900);
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) dlHid = Date.now();
+    else if (dlHid && Date.now() - dlHid > 600000) setTimeout(dailyPop, 400);
+  });
   T.addRoute(/^#\/daily$/, dailyPage);
   T.addRoute(/^#\/prayers$/, prayers);
   T.addRoute(/^#\/wird$/, wird);

@@ -432,7 +432,7 @@
     var favCount = S.fav.length;
     var groups = D.groups.map(function (g) {
       var cats = D.categories.filter(function (c) { return c.group === g.id; });
-      var isRail = cats.some(function (c) { return c.id === 'morning'; });
+      var isRail = cats.length > 1;
       if (isRail && sug) cats = cats.filter(function (c) { return c.id === sug; }).concat(cats.filter(function (c) { return c.id !== sug; }));
       var tiles = cats.map(function (c) {
         if (!isRail) return tileHtml(c, sug, today);
@@ -468,13 +468,13 @@
         '</div>' +
         '<div class="next-card" id="nextCard"></div>' +
       '</header>' + quranCard + (window.TAMYExtras ? window.TAMYExtras() : '') +
-      groups + (window.TAMYDailyCard ? window.TAMYDailyCard() : '') +
+      groups +
       '<section class="sec"><h2><span class="orn"></span>الأدوات<span class="orn"></span></h2><div class="tools">' + tools + '</div></section>' +
       '<div class="upd-end">' + (window.TAMYUpdateCard ? window.TAMYUpdateCard() : '') + '</div>' +
       '<div class="home-signature"><p class="foot">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p><small class="app-credit">تم عمل التطبيق بواسطة Mahmoud A Zarzoura</small></div>'
     );
     (function () {
-      var rail = document.querySelector('.azk-rail'); if (!rail) return;
+      Array.prototype.forEach.call(document.querySelectorAll('.azk-rail'), function (rail) {
       var cs = rail.querySelectorAll('.azk-card'), raf = 0;
       function mark() {
         raf = 0; var r = rail.getBoundingClientRect(), mid = r.left + r.width / 2, best = null, bd = 1e9;
@@ -483,6 +483,7 @@
       }
       rail.addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(mark); }, { passive: true });
       mark();
+      });
     })();
 
     function tick() {
