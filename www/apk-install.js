@@ -43,10 +43,10 @@
         return;
       }
       modal('<b>جارٍ تنزيل التحديث…</b><div id="apkP" style="margin-top:6px">0%</div>');
-      return P.addListener('progress', function (p) {
+      return Promise.resolve(P.addListener('progress', function (p) {
         var el = document.getElementById('apkP');
         if (el) el.textContent = p.total > 0 ? Math.round(p.done / p.total * 100) + '%' : Math.round(p.done / 1048576) + ' MB';
-      }).then(function (h) {
+      })).then(function (h) {
         return P.download({ url: url }).then(function () { try { h.remove(); } catch (e) {} }, function (e) { try { h.remove(); } catch (x) {} throw e; });
       }).then(function () {
         modal('<b>تم التنزيل</b><br>اضغط «تثبيت» في الشاشة التي ستظهر.');
