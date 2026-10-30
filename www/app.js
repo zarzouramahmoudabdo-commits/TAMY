@@ -140,6 +140,21 @@
     for (i = 0; i < L.length; i++) if (L[i].id === want) return L[i];
     return L[0];
   }
+  window.TAMYAudioURL = function (u) {
+    try {
+      var C = window.Capacitor;
+      if (u && !/^(https?:|blob:|data:)/.test(u) && C && C.convertFileSrc) return 'https://localhost/' + String(u).replace(/^\.?\//, '');
+    } catch (e) { /* لا شيء */ }
+    return u;
+  };
+  window.TAMYAudio = function (u) {
+    var a = new Audio(window.TAMYAudioURL(u));
+    a.addEventListener('error', function () {
+      if (a._fb || !u) return; a._fb = 1;
+      try { a.src = u; var p = a.play(); if (p && p.catch) p.catch(function () { /* لا شيء */ }); } catch (e) { /* لا شيء */ }
+    });
+    return a;
+  };
   function testSound() { var a = adhanSelOf('dhuhr'); return a ? { ch: a.ch, snd: a.ch + '.mp3' } : { ch: 'adhan2', snd: 'adhan.mp3' }; }
   function cleanupChans(chans) {
     var LN = Notif.plugin();
@@ -167,7 +182,7 @@
         S.settings[attr] = id; save();
         stopPrev();
         var a = (FEATURES.adhans || []).filter(function (x) { return x.id === id; })[0]; if (!a) return;
-        try { prevAudio = new Audio(a.file); var pr = prevAudio.play(); if (pr && pr.catch) pr.catch(function () { /* لا شيء */ }); prevTimer = setTimeout(stopPrev, 12000); } catch (e) { /* لا شيء */ }
+        try { prevAudio = window.TAMYAudio(a.file); var pr = prevAudio.play(); if (pr && pr.catch) pr.catch(function () { /* لا شيء */ }); prevTimer = setTimeout(stopPrev, 12000); } catch (e) { /* لا شيء */ }
         reschedule();
       };
     });
@@ -322,7 +337,7 @@
     var f = adhanFile(key);
     if (!FEATURES.adhan || !f) { toast('لم يُضف ملف الأذان إلى هذه النسخة'); return; }
     try { if (player.audio) player.audio.pause(); } catch (e) { /* لا شيء */ }
-    var a = new Audio(f); player.audio = a;
+    var a = window.TAMYAudio(f); player.audio = a;
     a.onended = stopAdhan;
     a.onerror = function () { toast('تعذّر تشغيل ملف الأذان'); stopAdhan(); };
     var pr = a.play();

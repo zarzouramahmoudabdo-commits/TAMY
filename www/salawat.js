@@ -91,7 +91,7 @@
         ln.schedule({ notifications: [n] }).then(function () { T.toast('سيصلك التنبيه بعد ٥ ثوانٍ'); });
       });
     };
-    if ($('#slPlay')) $('#slPlay').onclick = function () { try { var a = new Audio(feat.salawatFile); a.play().catch(function () { T.toast('تعذّر تشغيل الصوت'); }); } catch (e) { /* لا شيء */ } };
+    if ($('#slPlay')) $('#slPlay').onclick = function () { try { var a = window.TAMYAudio ? window.TAMYAudio(feat.salawatFile) : new Audio(feat.salawatFile); a.play().catch(function () { T.toast('تعذّر تشغيل الصوت'); }); } catch (e) { /* لا شيء */ } };
     T.bindRipples && T.bindRipples();
   }
   T.addRoute(/^#\/salawat$/, page);
