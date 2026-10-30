@@ -3,7 +3,12 @@
 (function () {
   'use strict';
   var C = window.Capacitor, P = null;
-  try { if (C && C.registerPlugin && C.isNativePlatform && C.isNativePlatform()) P = C.registerPlugin('ApkInstaller'); } catch (e) { P = null; }
+  try {
+    if (C) {
+      P = (C.Plugins && C.Plugins.ApkInstaller) || null;
+      if (!P && C.registerPlugin && (!C.isNativePlatform || C.isNativePlatform())) P = C.registerPlugin('ApkInstaller');
+    }
+  } catch (e) { P = null; }
   if (!P) return;
   var busy = false;
 
