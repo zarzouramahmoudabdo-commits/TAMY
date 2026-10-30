@@ -104,7 +104,7 @@
     rdClear();
     var a = new Audio(RADIO_URL);
     rd.a = a; rd.state = 'loading'; rdPaint();
-    a.onplaying = function () { if (rd.a === a) { rd.state = 'on'; rd.tries = 0; rd.code = null; clearTimeout(rd.timer); rdPaint(); } };
+    a.onplaying = function () { if (rd.a === a) { rd.state = 'on'; rd.tries = 0; rd.code = null; clearTimeout(rd.timer); rdPaint(); try { if (navigator.mediaSession) { navigator.mediaSession.metadata = new MediaMetadata({ title: 'إذاعة القرآن الكريم', artist: 'القاهرة · بث مباشر' }); navigator.mediaSession.setActionHandler('pause', rdStop); } } catch (er) { /* لا شيء */ } } };
     a.onwaiting = function () { if (rd.a === a && rd.state === 'on') { rd.state = 'loading'; rdPaint(); clearTimeout(rd.timer); rd.timer = setTimeout(function () { if (rd.a === a && rd.state === 'loading') rdRetry(); }, 12000); } };
     a.onerror = function () { if (rd.a === a) { rd.code = a.error ? a.error.code : 0; rdRetry(); } };
     a.onended = function () { if (rd.a === a) rdRetry(); };
@@ -113,11 +113,11 @@
     var pr = a.play();
     if (pr && pr.catch) pr.catch(function () { if (rd.a === a) rdRetry(); });
   }
-  function rdStart() { rdClear(); rd.code = null; rd.want = true; rd.tries = 0; rdOpen(); }
+  function rdStart() { try { if (window.TAMYRadio && window.TAMYRadio.stop) window.TAMYRadio.stop(); } catch (er) { /* لا شيء */ } rdClear(); rd.code = null; rd.want = true; rd.tries = 0; rdOpen(); }
   function radioCard() {
-    return '<section class="rad2" id="rdCard"><div class="rad2-ic">♫</div>' +
-      '<div class="rad2-tx"><b>إذاعة القرآن الكريم من القاهرة</b><small>بث مباشر · يفتح في المتصفح</small></div>' +
-      '<a class="rad2-btn" href="' + RADIO_URL + '" target="_blank" rel="noopener">استمع الآن</a></section>';
+    return '<section class="rad2 ' + rd.state + '" id="rdCard"><div class="rad2-ic">♫</div>' +
+      '<div class="rad2-tx"><b>إذاعة القرآن الكريم من القاهرة</b><small id="rdSub">' + rdText() + '</small></div>' +
+      '<button class="rad2-btn" id="rdToggle" type="button">' + (rd.state === 'off' ? 'استمع الآن' : 'إيقاف') + '</button></section>';
   }
   window.TAMYRadio = { stop: rdStop };
   window.addEventListener('online', function () { if (rd.want && rd.state !== 'on') { rd.tries = 0; rdOpen(); } });

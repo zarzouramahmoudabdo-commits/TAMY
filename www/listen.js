@@ -93,7 +93,7 @@
     var a = P.a; P.a = null;
     if (a) { a.onplaying = a.onpause = a.onended = a.onerror = a.onwaiting = a.ontimeupdate = a.onloadedmetadata = null; try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) { /* لا شيء */ } }
   }
-  function play(rid, mi, n) {
+  function play(rid, mi, n) { if (prevApi && prevApi.stop) prevApi.stop();
     ensureBar(); release();
     P.rid = rid; P.mi = mi; P.n = n; P.err = null; P.state = 'loading';
     lsSet('tamy_listen', { rid: rid, mi: mi, n: n });
