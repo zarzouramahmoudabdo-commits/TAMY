@@ -74,6 +74,7 @@
 
   /* ---------- إذاعة القرآن الكريم من القاهرة (بث مباشر) ---------- */
   var RADIO_URL = 'https://stream.radiojar.com/8s5u5tpdtwzuv';
+  var RADIO_URLS = ['https://n10.radiojar.com/8s5u5tpdtwzuv', 'https://stream.radiojar.com/8s5u5tpdtwzuv'];
   var rd = { a: null, code: null, want: false, state: 'off', tries: 0, timer: 0 };
   function rdText() {
     if (rd.state === 'off' && rd.code != null) return 'تعذّر الاتصال (رمز ' + rd.code + ')';
@@ -102,7 +103,7 @@
   function rdOpen() {
     if (!rd.want) return;
     rdClear();
-    var a = new Audio(RADIO_URL);
+    var a = new Audio(RADIO_URLS[rd.tries % RADIO_URLS.length]);
     rd.a = a; rd.state = 'loading'; rdPaint();
     a.onplaying = function () { if (rd.a === a) { rd.state = 'on'; rd.tries = 0; rd.code = null; clearTimeout(rd.timer); rdPaint(); try { if (navigator.mediaSession) { navigator.mediaSession.metadata = new MediaMetadata({ title: 'إذاعة القرآن الكريم', artist: 'القاهرة · بث مباشر' }); navigator.mediaSession.setActionHandler('pause', rdStop); } } catch (er) { /* لا شيء */ } } };
     a.onwaiting = function () { if (rd.a === a && rd.state === 'on') { rd.state = 'loading'; rdPaint(); clearTimeout(rd.timer); rd.timer = setTimeout(function () { if (rd.a === a && rd.state === 'loading') rdRetry(); }, 12000); } };
