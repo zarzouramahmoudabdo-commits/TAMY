@@ -74,7 +74,7 @@
 
   /* ---------- إذاعة القرآن الكريم من القاهرة (بث مباشر) ---------- */
   var RADIO_URL = 'https://stream.radiojar.com/8s5u5tpdtwzuv';
-  var RADIO_URLS = ['https://n10.radiojar.com/8s5u5tpdtwzuv', 'https://stream.radiojar.com/8s5u5tpdtwzuv'];
+  var RADIO_URLS = ['http://n10.radiojar.com/8s5u5tpdtwzuv', 'https://n10.radiojar.com/8s5u5tpdtwzuv', 'https://stream.radiojar.com/8s5u5tpdtwzuv'];
   var rd = { a: null, code: null, want: false, state: 'off', tries: 0, timer: 0 };
   function rdText() {
     if (rd.state === 'off' && rd.code != null) return 'تعذّر الاتصال (رمز ' + rd.code + ')';
