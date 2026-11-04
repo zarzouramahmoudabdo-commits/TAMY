@@ -339,18 +339,16 @@
     try { if (player.audio) player.audio.pause(); } catch (e) { /* لا شيء */ }
     var lu = window.TAMYAudioURL(f), a = new Audio(lu); player.audio = a;
     a.onended = stopAdhan;
-    a.onerror = function () {
-      if (!a._fb2 && lu !== f) {
-        a._fb2 = 1; a.src = f;
-        var p2 = a.play(); if (p2 && p2.catch) p2.catch(function () { /* لا شيء */ });
-        return;
-      }
-      toast('تعذّر تشغيل ملف الأذان' + (lu !== f ? ' (المحلي والإنترنت)' : ''));
-      stopAdhan();
-    };
+    function fb() {
+      if (a._fb2 || lu === f) return false;
+      a._fb2 = 1; a.src = f;
+      var p2 = a.play(); if (p2 && p2.catch) p2.catch(function () { toast('تعذّر تشغيل الصوت'); stopAdhan(); });
+      return true;
+    }
+    a.onerror = function () { if (fb()) return; toast('تعذّر تشغيل ملف الأذان'); stopAdhan(); };
     var pr = a.play();
     showBar(title || 'الأذان', true, key);
-    if (pr && pr.catch) pr.catch(function () { toast('تعذّر تشغيل الصوت'); stopAdhan(); });
+    if (pr && pr.catch) pr.catch(function () { if (fb()) return; toast('تعذّر تشغيل الصوت'); stopAdhan(); });
   }
   // عند دخول الوقت والتطبيق مفتوح: شريط بزر لتشغيل الأذان كاملًا (إشعار النظام يعمل بصوته القصير)
   var lastFired = '';
