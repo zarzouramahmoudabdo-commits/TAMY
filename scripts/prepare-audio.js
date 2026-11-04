@@ -9,7 +9,7 @@ const src = path.join(root, 'assets', 'audio');
 const www = path.join(root, 'www');
 const wwwAudio = path.join(www, 'audio');
 const raw = path.join(root, 'android', 'app', 'src', 'main', 'res', 'raw');
-const CLIP_SECONDS = 40;
+const CLIP_SECONDS = 300;   // أطول أذان ~288 ثانية: يُشغَّل كاملًا
 
 function find(base) {
   if (!fs.existsSync(src)) return null;
@@ -42,7 +42,7 @@ if (haveAndroid) {
   const out = path.join(raw, base + '.mp3');
   if (ff) {
     try {
-      cp.execFileSync('ffmpeg', ['-y', '-i', f, '-t', String(CLIP_SECONDS), '-af', 'afade=t=out:st=' + (CLIP_SECONDS - 5) + ':d=5', '-ac', '2', '-ar', '44100', '-c:a', 'libmp3lame', '-q:a', '5', out], { stdio: 'ignore' });
+      cp.execFileSync('ffmpeg', ['-y', '-i', f, '-t', String(CLIP_SECONDS), '-af', 'afade=t=out:st=' + (CLIP_SECONDS - 5) + ':d=5', '-ac', '1', '-ar', '44100', '-c:a', 'libmp3lame', '-b:a', '80k', out], { stdio: 'ignore' });
       console.log('✓ ' + base + ': نسخة الإشعار ' + CLIP_SECONDS + ' ثانية');
       return;
     } catch (e) { console.warn('! فشل القص بـ ffmpeg، سيُستخدم الملف كما هو'); }
@@ -75,7 +75,7 @@ cands.forEach((c) => {
     let ok = false;
     if (ff) {
       try {
-        cp.execFileSync('ffmpeg', ['-y', '-i', c.f, '-t', String(CLIP_SECONDS), '-af', 'afade=t=out:st=' + (CLIP_SECONDS - 5) + ':d=5', '-ac', '2', '-ar', '44100', '-c:a', 'libmp3lame', '-q:a', '5', out], { stdio: 'ignore' });
+        cp.execFileSync('ffmpeg', ['-y', '-i', c.f, '-t', String(CLIP_SECONDS), '-af', 'afade=t=out:st=' + (CLIP_SECONDS - 5) + ':d=5', '-ac', '1', '-ar', '44100', '-c:a', 'libmp3lame', '-b:a', '80k', out], { stdio: 'ignore' });
         ok = true;
       } catch (e) { /* لا شيء */ }
     }
