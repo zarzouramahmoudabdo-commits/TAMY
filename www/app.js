@@ -337,9 +337,17 @@
     var f = adhanFile(key);
     if (!FEATURES.adhan || !f) { toast('لم يُضف ملف الأذان إلى هذه النسخة'); return; }
     try { if (player.audio) player.audio.pause(); } catch (e) { /* لا شيء */ }
-    var a = window.TAMYAudio(f); player.audio = a;
+    var lu = window.TAMYAudioURL(f), a = new Audio(lu); player.audio = a;
     a.onended = stopAdhan;
-    a.onerror = function () { toast('تعذّر تشغيل ملف الأذان'); stopAdhan(); };
+    a.onerror = function () {
+      if (!a._fb2 && lu !== f) {
+        a._fb2 = 1; a.src = f;
+        var p2 = a.play(); if (p2 && p2.catch) p2.catch(function () { /* لا شيء */ });
+        return;
+      }
+      toast('تعذّر تشغيل ملف الأذان' + (lu !== f ? ' (المحلي والإنترنت)' : ''));
+      stopAdhan();
+    };
     var pr = a.play();
     showBar(title || 'الأذان', true, key);
     if (pr && pr.catch) pr.catch(function () { toast('تعذّر تشغيل الصوت'); stopAdhan(); });
