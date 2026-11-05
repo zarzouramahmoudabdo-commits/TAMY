@@ -475,13 +475,18 @@
     }).join('');
 
     var QS = window.TAMY_SURAHS, ql = S.quran.last;
+    var qbar = '';
+    try {
+      var qql = S.quran.last, qqs = window.TAMY_SURAHS;
+      if (qql && qqs && qqs.list) { var qd = 0; for (var qi = 0; qi < qql.s - 1; qi++) qd += qqs.list[qi].ayahs; qd += qql.a; qbar = '<span class="qc-bar"><i style="width:' + Math.max(1, Math.min(100, Math.round(qd / 6236 * 100))) + '%"></i></span>'; }
+    } catch (er) { qbar = ''; }
     var quranCard = '<a class="quran-card" href="#/quran"><span class="qc-ic">' + I.quran + '</span><span class="qc-tx"><b>القرآن الكريم</b><small>' +
       (ql && QS && QS.list[ql.s - 1] ? 'متابعة القراءة: سورة ' + QS.list[ql.s - 1].name + ' — آية ' + ar(ql.a) : 'المصحف كاملًا بالترتيب — ١١٤ سورة') +
-      '</small></span><span class="qc-go">' + I.back + '</span></a>';
+      '</small>' + qbar + '</span><span class="qc-go">' + I.back + '</span></a>';
     view(
       '<header class="hero">' +
         '<div class="hero-top">' +
-          '<div><div class="salam">السلام عليكم ورحمة الله</div><div class="greet">' + greeting(now) + '</div><div class="upd-top">' + (window.TAMYUpdateCard ? window.TAMYUpdateCard() : '') + '</div></div>' +
+          '<div><div class="salam">السلام عليكم ورحمة الله</div><div class="greet">' + greeting(now) + '</div><div class="upd-top">' + (window.TAMYUpdateCard ? window.TAMYUpdateCard() : '') + (window.TAMYStreak && window.TAMYStreak() > 0 ? '<a class="stk" href="#/prayers"><span class="stk-i">' + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3 4 4.5 4 9a4 4 0 0 1-8 0c0-1.5.6-2.4 1.4-3.3C10 10 11 9 11.5 7.5 11.8 5.7 12 4.5 12 3z"/></svg>' + '</span><b>' + ar(window.TAMYStreak()) + ' أيام متتالية</b></a>' : '') + '</div></div>' +
           '<div class="dates"><b>' + esc(hijri(now)) + '</b><small>' + esc(gregorian(now)) + '</small><span class="cr"><i>تم عمل التطبيق بواسطة</i><b>Mahmoud A Zarzoura</b></span></div>' +
         '</div>' +
         '<div class="next-card" id="nextCard"></div>' +
@@ -506,7 +511,7 @@
       var n = new Date(), nx = nextPrayer(n), t = nx.today;
       var cur = P.current(n, t);
       var pills = P.ORDER.map(function (k) {
-        return '<div class="pill' + (k === nx.key && !nx.tomorrow ? ' next' : '') + (k === cur ? ' cur' : '') + '"><span>' + prayerLabel(k, t[k]) + '</span><b>' + fmtTime(t[k]) + '</b></div>';
+        return '<div class="pill' + (k === nx.key && !nx.tomorrow ? ' next' : '') + (k === cur ? ' cur' : '') + (window.TAMYPrayDone && window.TAMYPrayDone(k) ? ' pd' : '') + '"><span>' + prayerLabel(k, t[k]) + '</span><b>' + fmtTime(t[k]) + '</b></div>';
       }).join('');
       var el = $('#nextCard'); if (!el) return;
       el.innerHTML =

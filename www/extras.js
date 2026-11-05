@@ -233,7 +233,14 @@
   function tile(h, ic, t) { return '<a class="ex-tile" href="' + h + '"><span>' + ic + '</span><b>' + t + '</b></a>'; }
   window.TAMYExtras = function () {
     window.TAMYDailyCard = dailyCard;
-    var cs = [['#/daily', '☀️', 'ذكر اليوم'], ['#/prayers', '🕌', 'صلواتي'], ['#/wird', '📖', 'الورد والختمة'], ['#/occasions', '🌙', 'المناسبات'], ['#/zakat', '💰', 'الزكاة']];
+    var SV = function (p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
+    var cs = [
+      ['#/daily', SV('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'), 'ذكر اليوم'],
+      ['#/prayers', SV('<path d="M4 21V12h16v9M2 21h20M8 12a4 4 0 0 1 8 0M12 6V3"/>'), 'صلواتي'],
+      ['#/wird', SV('<path d="M12 6v14M12 6c-2-1.5-5-2-8-1.5V18c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V4.5C17 4 14 4.5 12 6z"/>'), 'الورد والختمة'],
+      ['#/occasions', SV('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'), 'المناسبات'],
+      ['#/zakat', SV('<circle cx="12" cy="12" r="8"/><path d="M12 7v10M9.5 9.5c0-1 1-1.5 2.5-1.5s2.5.5 2.5 1.5-1 1.4-2.5 1.8-2.5.8-2.5 1.8 1 1.5 2.5 1.5 2.5-.5 2.5-1.5"/>'), 'الزكاة']
+    ];
     return '<div class="ex-chips">' + cs.map(function (x) { return '<a class="ex-chip" href="' + x[0] + '"><span class="ex-ci">' + x[1] + '</span><b>' + x[2] + '</b></a>'; }).join('') + '</div>';
   };
   (function () {
@@ -270,6 +277,8 @@
     requestAnimationFrame(function () { o.classList.add('in'); });
   }
   setTimeout(dailyPop, 900);
+  window.TAMYPrayDone = function (k) { try { var d = pget()[dkey(new Date())] || {}; return !!d[k]; } catch (er) { return false; } };
+  window.TAMYStreak = function () { try { return +streak(pget()) || 0; } catch (er) { return 0; } };
   T.addRoute(/^#\/daily$/, dailyPage);
   T.addRoute(/^#\/prayers$/, prayers);
   T.addRoute(/^#\/wird$/, wird);

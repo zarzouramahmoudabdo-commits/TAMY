@@ -641,3 +641,19 @@ button.rad2-btn{border:0;font-family:inherit;cursor:pointer}
 .ex-ci{color:#e8c872}
 .ex-ci svg{width:18px;height:18px}
 @media (prefers-reduced-motion:reduce){.upd-top .upd-card.has{animation:none}}
+
+
+/* ===== الرئيسية: التسلسل، علامة الصلاة، كارت القرآن النحيف ===== */
+.upd-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.stk{display:inline-flex;align-items:center;gap:8px;padding:7px 14px 7px 8px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,150,80,.35);color:inherit;text-decoration:none}
+.stk-i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(255,120,60,.16);color:#ffb070}
+.stk-i svg{width:17px;height:17px}
+.stk b{font-size:14px}
+.pill.pd{position:relative}
+.pill.pd::after{content:"\2713";position:absolute;top:4px;inset-inline-start:7px;font-size:11px;font-weight:700;color:#7ee0a3}
+.quran-card{padding-block:10px!important;min-height:0!important}
+.quran-card .qc-ic{width:42px!important;height:42px!important}
+.quran-card .qc-tx b{font-size:17px}
+.quran-card .qc-tx small{font-size:12.5px}
+.qc-bar{display:block;height:3px;margin-top:6px;border-radius:2px;background:rgba(0,0,0,.22);overflow:hidden}
+.qc-bar i{display:block;height:100%;border-radius:2px;background:rgba(36,25,0,.78)}
