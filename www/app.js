@@ -467,14 +467,11 @@
     }).join('');
 
     var tools = [
-      ['#/tasbeeh', 'المسبحة', 'beads', 3],
-      ['#/times', 'المواقيت', 'clock', 2],
       ['#/qibla', 'القبلة', 'qibla', 0],
       ['#/names', 'أسماء الله', 'names', 5],
-      ['#/read/fav', 'المفضلة' + (favCount ? ' (' + ar(favCount) + ')' : ''), 'fav', 6],
-      ['#/settings', 'الإعدادات', 'gear', 7]
+      ['#/read/fav', 'المفضلة' + (favCount ? ' (' + ar(favCount) + ')' : ''), 'fav', 6]
     ].map(function (t) {
-      return '<a class="tool tone-' + t[3] + '" href="' + t[0] + '"><span class="tl-ic">' + I[t[2]] + '</span><span>' + t[1] + '</span></a>';
+      return '<a class="ex-chip" href="' + t[0] + '"><span class="ex-ci">' + I[t[2]] + '</span><b>' + t[1] + '</b></a>';
     }).join('');
 
     var QS = window.TAMY_SURAHS, ql = S.quran.last;
@@ -484,14 +481,12 @@
     view(
       '<header class="hero">' +
         '<div class="hero-top">' +
-          '<div><div class="salam">السلام عليكم ورحمة الله</div><div class="greet">' + greeting(now) + '</div></div>' +
+          '<div><div class="salam">السلام عليكم ورحمة الله</div><div class="greet">' + greeting(now) + '</div><div class="upd-top">' + (window.TAMYUpdateCard ? window.TAMYUpdateCard() : '') + '</div></div>' +
           '<div class="dates"><b>' + esc(hijri(now)) + '</b><small>' + esc(gregorian(now)) + '</small><span class="cr"><i>تم عمل التطبيق بواسطة</i><b>Mahmoud A Zarzoura</b></span></div>' +
         '</div>' +
         '<div class="next-card" id="nextCard"></div>' +
-      '</header>' + quranCard + (window.TAMYExtras ? window.TAMYExtras() : '') +
+      '</header>' + quranCard + (window.TAMYExtras ? window.TAMYExtras() : '') + '<div class="ex-chips ex-tools">' + tools + '</div>' +
       groups +
-      '<section class="sec"><h2><span class="orn"></span>الأدوات<span class="orn"></span></h2><div class="tools">' + tools + '</div></section>' +
-      '<div class="upd-end">' + (window.TAMYUpdateCard ? window.TAMYUpdateCard() : '') + '</div>' +
       '<div class="home-signature"><p class="foot">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p></div>'
     );
     (function () {
