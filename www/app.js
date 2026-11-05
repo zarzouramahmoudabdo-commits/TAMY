@@ -491,6 +491,7 @@
         '</div>' +
         '<div class="next-card" id="nextCard"></div>' +
       '</header>' + quranCard + (window.TAMYExtras ? window.TAMYExtras() : '') + '<div class="ex-chips ex-tools">' + tools + '</div>' +
+      (window.TAMYDailyStrip ? window.TAMYDailyStrip() : '') +
       groups +
       '<div class="home-signature"><p class="foot">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p></div>'
     );

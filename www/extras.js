@@ -235,7 +235,6 @@
     window.TAMYDailyCard = dailyCard;
     var SV = function (p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
     var cs = [
-      ['#/daily', SV('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'), 'ذكر اليوم'],
       ['#/wird', SV('<path d="M12 6v14M12 6c-2-1.5-5-2-8-1.5V18c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V4.5C17 4 14 4.5 12 6z"/>'), 'الورد والختمة'],
       ['#/occasions', SV('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'), 'المناسبات'],
       ['#/zakat', SV('<circle cx="12" cy="12" r="8"/><path d="M12 7v10M9.5 9.5c0-1 1-1.5 2.5-1.5s2.5.5 2.5 1.5-1 1.4-2.5 1.8-2.5.8-2.5 1.8 1 1.5 2.5 1.5 2.5-.5 2.5-1.5"/>'), 'الزكاة']
@@ -273,11 +272,26 @@
     function close() { o.classList.remove('in'); setTimeout(function () { if (o.parentNode) o.parentNode.removeChild(o); dlOpen = false; }, 250); }
     o.addEventListener('click', function (ev) { var x = ev.target; if (x === o || (x.classList && (x.classList.contains('dl-ok') || x.classList.contains('dl-x')))) close(); });
     document.body.appendChild(o);
+    Array.prototype.forEach.call(o.querySelectorAll('.dl-x, .dl-ok'), function (b) {
+      b.addEventListener('click', function (ev) { ev.stopPropagation(); close(); });
+      b.addEventListener('touchend', function (ev) { ev.preventDefault(); close(); });
+    });
     requestAnimationFrame(function () { o.classList.add('in'); });
   }
   setTimeout(dailyPop, 900);
   window.TAMYPrayDone = function (k) { try { var d = pget()[dkey(new Date())] || {}; return !!d[k]; } catch (er) { return false; } };
   window.TAMYStreak = function () { try { return +streak(pget()) || 0; } catch (er) { return 0; } };
+  window.TAMYDailyStrip = function () {
+    var lf = [];
+    try {
+      var bx = document.createElement('div'); bx.innerHTML = dailyCard();
+      bx.querySelectorAll('*').forEach(function (n) { if (!n.children.length) { var t = (n.textContent || '').trim(); if (t) lf.push(t); } });
+    } catch (er) { return ''; }
+    if (lf.length && lf[0] === 'ذكر اليوم') lf.shift();
+    if (!lf.length) return '';
+    return '<a class="dly" href="#/daily"><span class="dly-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span>' +
+      '<span class="dly-tx"><b>' + dlEsc(lf[0]) + '</b><small>ذكر اليوم' + (lf[1] ? ' · ' + dlEsc(lf[1]) : '') + '</small></span></a>';
+  };
   T.addRoute(/^#\/daily$/, dailyPage);
   T.addRoute(/^#\/prayers$/, prayers);
   T.addRoute(/^#\/wird$/, wird);
