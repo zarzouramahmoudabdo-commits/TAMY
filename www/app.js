@@ -510,6 +510,7 @@
     function tick() {
       var n = new Date(), nx = nextPrayer(n), t = nx.today;
       var cur = P.current(n, t);
+      var pdn = 0, pdots = P.ORDER.map(function (kk) { var on = window.TAMYPrayDone && window.TAMYPrayDone(kk); if (on) pdn++; return '<i class="' + (on ? 'on' : '') + '"></i>'; }).join('');
       var pills = P.ORDER.map(function (k) {
         return '<div class="pill' + (k === nx.key && !nx.tomorrow ? ' next' : '') + (k === cur ? ' cur' : '') + (window.TAMYPrayDone && window.TAMYPrayDone(k) ? ' pd' : '') + '"><span>' + prayerLabel(k, t[k]) + '</span><b>' + fmtTime(t[k]) + '</b></div>';
       }).join('');
@@ -518,6 +519,7 @@
         '<div class="nc-row"><div><div class="nc-lbl">الصلاة القادمة</div><div class="nc-name">' + prayerLabel(nx.key, nx.time) + '</div></div>' +
         '<div class="nc-time"><b>' + fmtTime(nx.time) + '</b><small>بعد ' + fmtCountdown(nx.time.getTime() - n.getTime()) + '</small></div></div>' +
         '<div class="pills">' + pills + '</div>' +
+        '<a class="pdots" href="#/prayers"><span>صلواتك اليوم</span><em>' + pdots + '</em><b>' + ar(pdn) + '/' + ar(P.ORDER.length) + '</b></a>' +
         '<div class="nc-loc">' + I.pin + esc(S.settings.city.name) + '</div>';
     }
     tick(); every(tick, 1000);
