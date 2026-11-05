@@ -295,6 +295,58 @@
   function dlEsc(x) { return String(x).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
   var rawStrip = window.TAMYDailyStrip;
   window.TAMYDailyStrip = function () { try { return rawStrip(); } catch (er) { return ''; } };
+  function dgProbe(label, url, log) {
+    return new Promise(function (res) {
+      var a = new Audio(), done = false, t0 = Date.now(), tm;
+      function fin(m) { if (done) return; done = true; clearTimeout(tm); try { a.pause(); a.removeAttribute('src'); a.load(); } catch (er) { /* لا شيء */ } log(label + ': ' + m + ' (' + (Date.now() - t0) + 'ms)'); res(); }
+      tm = setTimeout(function () { fin('TIMEOUT readyState=' + a.readyState + ' net=' + a.networkState); }, 9000);
+      a.preload = 'metadata';
+      a.onloadedmetadata = function () { fin('OK duration=' + Math.round(a.duration) + 's'); };
+      a.onerror = function () { fin('ERROR code=' + (a.error ? a.error.code : '?') + ' ' + ((a.error && a.error.message) || '')); };
+      a.src = url;
+    });
+  }
+  function dgEnv(log) {
+    var C = window.Capacitor || {}, info = window.TAMYAdhanInfo ? window.TAMYAdhanInfo() : {};
+    log('origin: ' + location.origin + ' online=' + navigator.onLine);
+    log('Capacitor: ' + (window.Capacitor ? 'yes' : 'NO') + ' platform=' + (C.getPlatform ? C.getPlatform() : '?') + ' native=' + (C.isNativePlatform ? C.isNativePlatform() : '?'));
+    log('serverUrl: ' + (window.WEBVIEW_SERVER_URL || '-'));
+    log('plugins: ' + (C.Plugins ? Object.keys(C.Plugins).join(',') : '-'));
+    log('adhan info: ' + JSON.stringify(info));
+    var f = info.dhuhr, lu = (f && window.TAMYAudioURL) ? window.TAMYAudioURL(f) : '', ru = f ? new URL(f, location.href).href : '';
+    log('file: ' + f); log('local: ' + lu); log('remote: ' + ru);
+    return { lu: lu, ru: ru };
+  }
+  function dgNet(u, log) {
+    var p = Promise.resolve();
+    if (u.ru) p = p.then(function () { return fetch(u.ru, { method: 'HEAD', cache: 'no-store' }).then(function (r) { log('remote HEAD: ' + r.status + ' type=' + r.headers.get('content-type') + ' len=' + r.headers.get('content-length')); }, function (er) { log('remote HEAD failed: ' + er); }); });
+    if (u.lu) p = p.then(function () { return dgProbe('local audio', u.lu, log); });
+    if (u.ru) p = p.then(function () { return dgProbe('remote audio', u.ru, log); });
+    return p;
+  }
+  function dgNotif(log) {
+    var ln = LN();
+    if (!ln) { log('LocalNotifications: MISSING'); return Promise.resolve(); }
+    return Promise.resolve(ln.checkPermissions()).then(function (r) { log('perm: ' + JSON.stringify(r)); }, function (er) { log('perm err: ' + er); })
+      .then(function () { return ln.checkExactNotificationSetting ? Promise.resolve(ln.checkExactNotificationSetting()).then(function (r) { log('exact: ' + JSON.stringify(r)); }, function (er) { log('exact err: ' + er); }) : null; })
+      .then(function () { return Promise.resolve(ln.listChannels()).then(function (r) { (r.channels || []).forEach(function (c) { log('chan ' + c.id + ' sound=' + c.sound + ' imp=' + c.importance + ' vib=' + c.vibration); }); }, function (er) { log('channels err: ' + er); }); })
+      .then(function () { return Promise.resolve(ln.getPending()).then(function (r) { log('pending: ' + ((r.notifications || []).length)); }, function (er) { log('pending err: ' + er); }); });
+  }
+  function dgRun(log) {
+    var u = dgEnv(log);
+    dgNet(u, log).then(function () { return dgNotif(log); }).then(function () { log('--- done ---'); }, function (er) { log('FATAL: ' + er); });
+  }
+  function diag() {
+    show(head('تشخيص الأذان', '#/settings') +
+      '<div class="ex-sum"><small>اضغط «ابدأ الفحص» وانتظر ١٥ ثانية، ثم «نسخ النتيجة» وألصقها في المحادثة.</small></div>' +
+      '<div style="display:flex;gap:8px;margin:8px 0"><button class="btn gold sm" id="dgGo" type="button">ابدأ الفحص</button><button class="btn ghost sm" id="dgCp" type="button">نسخ النتيجة</button></div>' +
+      '<pre id="dgOut" dir="ltr" style="white-space:pre-wrap;word-break:break-all;font-size:11.5px;line-height:1.7;margin:0"></pre>');
+    var out = $('#dgOut');
+    function log(s) { out.textContent += s + '\n'; }
+    $('#dgCp').onclick = function () { try { navigator.clipboard.writeText(out.textContent); T.toast('تم النسخ'); } catch (er) { T.toast('تعذّر النسخ، صوّر الشاشة'); } };
+    $('#dgGo').onclick = function () { out.textContent = ''; dgRun(log); };
+  }
+  T.addRoute(/^#\/diag$/, diag);
   T.addRoute(/^#\/daily$/, dailyPage);
   T.addRoute(/^#\/prayers$/, prayers);
   T.addRoute(/^#\/wird$/, wird);

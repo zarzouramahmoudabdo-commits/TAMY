@@ -140,6 +140,11 @@
     for (i = 0; i < L.length; i++) if (L[i].id === want) return L[i];
     return L[0];
   }
+  window.TAMYAdhanInfo = function () {
+    var o = {};
+    try { o.dhuhr = adhanFile('dhuhr'); o.fajr = adhanFile('fajr'); o.test = testSound(); o.enabled = !!FEATURES.adhan; } catch (er) { o.err = String(er); }
+    return o;
+  };
   window.TAMYAudioURL = function (u) {
     try {
       var C = window.Capacitor;
@@ -927,7 +932,7 @@
         '</div>' +
 
         '<h3 class="sh">التحديثات</h3>' +
-        '<div class="card"><a class="row" href="#/update"><span class="rt">تحديث التطبيق<small>تنزيل آخر إصدار وتثبيته من داخل التطبيق</small></span>' + I.back + '</a></div>' +
+        '<div class="card"><a class="row" href="#/diag"><span class="rt">تشخيص الأذان<small>فحص الصوت والإشعارات وإرسال النتيجة</small></span>' + I.back + '</a><a class="row" href="#/update"><span class="rt">تحديث التطبيق<small>تنزيل آخر إصدار وتثبيته من داخل التطبيق</small></span>' + I.back + '</a></div>' +
 
         '<h3 class="sh">الصلاة على النبي</h3>' +
         '<div class="card"><a class="row" href="#/salawat"><span class="rt">تنبيه الصلاة على النبي ﷺ<small>اختر كل كم دقيقة وصوت التنبيه</small></span>' + I.back + '</a></div>' +
