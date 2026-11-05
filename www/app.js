@@ -145,21 +145,44 @@
     try { o.dhuhr = adhanFile('dhuhr'); o.fajr = adhanFile('fajr'); o.test = testSound(); o.enabled = !!FEATURES.adhan; } catch (er) { o.err = String(er); }
     return o;
   };
+  var ADK = 'tamy_adl', adBusy = {};
+  function adMap() { try { return JSON.parse(localStorage.getItem(ADK) || '{}') || {}; } catch (er) { return {}; } }
+  function adFS() { var C = window.Capacitor; return C && C.Plugins && C.Plugins.Filesystem; }
   window.TAMYAudioURL = function (u) {
     try {
-      var C = window.Capacitor;
-      if (u && !/^(https?:|blob:|data:)/.test(u) && C && C.convertFileSrc) return 'https://localhost/' + String(u).replace(/^\.?\//, '');
-    } catch (e) { /* لا شيء */ }
+      var p = u && adMap()[u], C = window.Capacitor;
+      if (p && C && C.convertFileSrc) { var x = C.convertFileSrc(p), i = x.indexOf('/_capacitor_file_'); if (i > -1) return 'https://localhost' + x.slice(i); }
+    } catch (er) { /* لا شيء */ }
     return u;
   };
+  window.TAMYAudioPrefetch = function (list) {
+    var fs = adFS(); if (!fs || navigator.onLine === false) return;
+    (list || []).forEach(function (u) {
+      if (!u || adMap()[u] || adBusy[u] || /^(https?:|blob:|data:)/.test(u)) return;
+      adBusy[u] = 1;
+      var rel = 'adhan/' + u.replace(/[^A-Za-z0-9_.-]/g, '_');
+      Promise.resolve(fs.mkdir({ path: 'adhan', directory: 'DATA', recursive: true })).catch(function () { /* موجود */ }).then(function () {
+        return fs.downloadFile({ url: new URL(u, location.href).href, path: rel, directory: 'DATA' });
+      }).then(function (r) {
+        return fs.stat({ path: rel, directory: 'DATA' }).then(function (st) {
+          if (!st || st.size < 3000) { fs.deleteFile({ path: rel, directory: 'DATA' }).catch(function () { /* لا شيء */ }); throw new Error('bad'); }
+          var m = adMap(); m[u] = (r && r.path) || ''; if (m[u]) { try { localStorage.setItem(ADK, JSON.stringify(m)); } catch (er) { /* لا شيء */ } }
+        });
+      }).catch(function () { /* لا شيء */ }).then(function () { delete adBusy[u]; });
+    });
+  };
   window.TAMYAudio = function (u) {
-    var a = new Audio(window.TAMYAudioURL(u));
+    var lu = window.TAMYAudioURL(u), a = new Audio(lu);
+    if (lu === u) window.TAMYAudioPrefetch([u]);
     a.addEventListener('error', function () {
-      if (a._fb || !u) return; a._fb = 1;
-      try { a.src = u; var p = a.play(); if (p && p.catch) p.catch(function () { /* لا شيء */ }); } catch (e) { /* لا شيء */ }
+      if (a._fb || !u || lu === u) return; a._fb = 1;
+      try { a.src = u; var p = a.play(); if (p && p.catch) p.catch(function () { /* لا شيء */ }); } catch (er) { /* لا شيء */ }
     });
     return a;
   };
+  function adPrefetchSel() { try { var i = window.TAMYAdhanInfo(); window.TAMYAudioPrefetch([i.dhuhr, i.fajr]); } catch (er) { /* لا شيء */ } }
+  setTimeout(adPrefetchSel, 4000);
+  document.addEventListener('change', function (e) { if (e.target && e.target.classList && e.target.classList.contains('ad-sel')) setTimeout(adPrefetchSel, 800); });
   function testSound() { var a = adhanSelOf('dhuhr'); return a ? { ch: a.ch, snd: a.ch + '.mp3' } : { ch: 'adhan2', snd: 'adhan.mp3' }; }
   function cleanupChans(chans) {
     var LN = Notif.plugin();
@@ -346,14 +369,14 @@
     a.onended = stopAdhan;
     function fb() {
       if (a._fb2 || lu === f) return false;
-      a._fb2 = 1; a.src = f;
-      var p2 = a.play(); if (p2 && p2.catch) p2.catch(function () { toast('تعذّر تشغيل الصوت'); stopAdhan(); });
+      a._fb2 = Date.now(); a.src = f;
+      var p2 = a.play(); if (p2 && p2.catch) p2.catch(function () { if (Date.now() - a._fb2 > 400) { toast('تعذّر تشغيل الصوت'); stopAdhan(); } });
       return true;
     }
-    a.onerror = function () { if (fb()) return; toast('تعذّر تشغيل ملف الأذان'); stopAdhan(); };
+    a.onerror = function () { if (a._fb2) { if (Date.now() - a._fb2 < 600) return; } else if (fb()) return; toast('تعذّر تشغيل ملف الأذان'); stopAdhan(); };
     var pr = a.play();
     showBar(title || 'الأذان', true, key);
-    if (pr && pr.catch) pr.catch(function () { if (fb()) return; toast('تعذّر تشغيل الصوت'); stopAdhan(); });
+    if (pr && pr.catch) pr.catch(function () { if (a._fb2) return; if (fb()) return; toast('تعذّر تشغيل الصوت'); stopAdhan(); });
   }
   // عند دخول الوقت والتطبيق مفتوح: شريط بزر لتشغيل الأذان كاملًا (إشعار النظام يعمل بصوته القصير)
   var lastFired = '';
