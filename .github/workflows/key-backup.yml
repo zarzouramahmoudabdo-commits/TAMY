@@ -1,0 +1,23 @@
+name: key-backup
+on: workflow_dispatch
+jobs:
+  b:
+    runs-on: ubuntu-latest
+    steps:
+      - name: bundle
+        env:
+          KS: ${{ secrets.TAMY_KEYSTORE_B64 }}
+          KP: ${{ secrets.TAMY_KEY_PASS }}
+          BP: ${{ secrets.BACKUP_PASS }}
+        run: |
+          mkdir out && cd out
+          printf '%s' "$KS" | base64 -d > tamy.jks
+          printf '%s' "$KP" > pass.txt
+          keytool -list -v -keystore tamy.jks -storepass "$KP" > info.txt 2>&1 || true
+          tar czf ../k.tgz . && cd ..
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass env:BP -in k.tgz -out key-backup.enc
+      - uses: actions/upload-artifact@v4
+        with:
+          name: key-backup
+          path: key-backup.enc
+          retention-days: 1
