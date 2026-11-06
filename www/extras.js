@@ -330,7 +330,7 @@
     return Promise.resolve(ln.checkPermissions()).then(function (r) { log('perm: ' + JSON.stringify(r)); }, function (er) { log('perm err: ' + er); })
       .then(function () { return ln.checkExactNotificationSetting ? Promise.resolve(ln.checkExactNotificationSetting()).then(function (r) { log('exact: ' + JSON.stringify(r)); }, function (er) { log('exact err: ' + er); }) : null; })
       .then(function () { return Promise.resolve(ln.listChannels()).then(function (r) { (r.channels || []).forEach(function (c) { log('chan ' + c.id + ' sound=' + c.sound + ' imp=' + c.importance + ' vib=' + c.vibration); }); }, function (er) { log('channels err: ' + er); }); })
-      .then(function () { return Promise.resolve(ln.getPending()).then(function (r) { log('pending: ' + ((r.notifications || []).length)); }, function (er) { log('pending err: ' + er); }); });
+      .then(function () { return Promise.resolve(ln.getPending()).then(function (r) { var ns = r.notifications || []; log('pending: ' + ns.length); log('salawat pending: ' + ns.filter(function (n) { return n.id >= 7000 && n.id < 8000; }).length); log('prayer pending: ' + ns.filter(function (n) { return n.id >= 1000 && n.id < 1200; }).length); try { log('now: ' + new Date().toString()); log('cfg: ' + localStorage.getItem('tamy_salawat')); } catch (e) { } }, function (er) { log('pending err: ' + er); }); });
   }
   function dgRun(log) {
     var u = dgEnv(log);

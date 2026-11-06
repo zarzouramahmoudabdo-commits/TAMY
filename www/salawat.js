@@ -76,7 +76,7 @@
         '<div class="row btns"><button type="button" class="btn ghost sm" id="slTest">تنبيه تجريبي</button>' + (feat.salawatFile ? '<button type="button" class="btn ghost sm" id="slPlay">' + I.play + 'سماع الصوت</button>' : '') + '</div>' +
       '</div>' +
       '<p class="note">' + (feat.salawat ? 'التنبيه سيصلك بصوت الصلاة على النبي.' : 'لم يُضف ملف الصوت بعد، فسيصلك التنبيه بنغمة الإشعار العادية.') + ' يعمل التنبيه والتطبيق مغلق، ويُجدَّد في كل مرة تفتح فيها التطبيق (يغطي الأيام الثلاثة القادمة).</p>' +
-      '</div>', 'page');
+      '<div class="card"><a class="row" href="#/diag"><span class="rt">فحص التنبيهات<small>يعرض المنبّهات المسجّلة</small></span>' + I.back + '</a></div></div>', 'page');
     function commit() { saveCfg(cfg); later(800); }
     $('#slOn').onchange = function (e) { cfg.on = e.target.checked; commit(); T.toast(cfg.on ? 'تم تفعيل التنبيه' : 'تم إيقاف التنبيه'); };
     $$('#slEvery .chip').forEach(function (c) { c.onclick = function () { cfg.every = +c.getAttribute('data-m'); $$('#slEvery .chip').forEach(function (x) { x.classList.toggle('on', x === c); }); commit(); }; });
